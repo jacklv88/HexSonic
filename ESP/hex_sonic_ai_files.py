@@ -26,16 +26,18 @@ CUSTOM_BLOCK_LIST = [
     'dist',                 # python 构建产物
     'sdkconfig',
     # 'main.c',
-    'driver_lcd_touch.c',
-    'driver_lcd_touch.h',
-    'driver_io.h',
-    'driver_io.c',
+    # 'driver_lcd_touch.c',
+    # 'driver_lcd_touch.h',
+    # 'driver_io.h',
+    # 'driver_io.c',
     'CST816D.c',
     'CST816D.h',
     'esp_lcd_spd2010.c',
     'esp_lcd_spd2010.h',
     'image.jpg',
     'image.png',
+    # 'lvgl_img_jpeg_png_test.',
+    # 'lvgl_img_jpeg_png_test.h',
 
 ]
 

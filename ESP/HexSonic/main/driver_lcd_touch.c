@@ -1,4 +1,3 @@
-// main/driver_lcd_touch.c
 #include "driver_lcd_touch.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -13,6 +12,7 @@
 #include "CST816D.h"
 #include "esp_lvgl_port.h"
 #include "lvgl.h"
+#include "esp_lv_decoder.h"       // 新增：图片解码库
 
 #define TAG "LCD_TOUCH"
 
@@ -32,7 +32,6 @@
 #define TP_SCL          33
 #define TP_SDA          34
 #define TP_RST          47
-// #define TP_INT          4   // 未使用触摸中断引脚
 
 // ----------------------- 屏幕参数 -----------------------
 #define LCD_H_RES       412
@@ -47,6 +46,7 @@
 static esp_lcd_panel_handle_t panel_handle = NULL;
 static esp_lcd_panel_io_handle_t io_handle = NULL;
 static i2c_master_bus_handle_t i2c_bus = NULL;
+static esp_lv_decoder_handle_t decoder_handle = NULL;  // 新增：解码器句柄
 
 // ----------------------- 触摸读回调（LVGL 9.x 接口） -----------------------
 static void lvgl_touch_read(lv_indev_t *indev, lv_indev_data_t *data)
@@ -57,9 +57,9 @@ static void lvgl_touch_read(lv_indev_t *indev, lv_indev_data_t *data)
     if (num > 0) {
         data->point.x = x;
         data->point.y = y;
-        data->state = LV_INDEV_STATE_PR;       // 按下状态
+        data->state = LV_INDEV_STATE_PR;
     } else {
-        data->state = LV_INDEV_STATE_REL;      // 释放状态
+        data->state = LV_INDEV_STATE_REL;
     }
 }
 
@@ -93,7 +93,7 @@ void driver_lcd_touch_init(void)
     // 3. 创建面板 IO（QSPI）
     esp_lcd_panel_io_spi_config_t io_config = {
         .cs_gpio_num = LCD_CS,
-        .dc_gpio_num = -1,              // QSPI 无 DC
+        .dc_gpio_num = -1,
         .spi_mode = 3,
         .pclk_hz = 40 * 1000 * 1000,
         .trans_queue_depth = 10,
@@ -107,12 +107,12 @@ void driver_lcd_touch_init(void)
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST,
                                              &io_config, &io_handle));
 
-    // 4. 创建 SPD2010 面板（使用硬件复位引脚）
+    // 4. 创建 SPD2010 面板
     const spd2010_vendor_config_t vendor_config = {
         .flags = { .use_qspi_interface = 1 },
     };
     const esp_lcd_panel_dev_config_t panel_config = {
-        .reset_gpio_num = LCD_RST,      // 硬件复位引脚
+        .reset_gpio_num = LCD_RST,
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
         .bits_per_pixel = LCD_BIT_PER_PIXEL,
         .vendor_config = (void *)&vendor_config,
@@ -147,7 +147,7 @@ void driver_lcd_touch_init(void)
     gpio_set_level(TP_RST, 0);
     vTaskDelay(pdMS_TO_TICKS(10));
     gpio_set_level(TP_RST, 1);
-    vTaskDelay(pdMS_TO_TICKS(50));   // 等待触摸芯片稳定
+    vTaskDelay(pdMS_TO_TICKS(50));
 
     // 8. 初始化触摸芯片
     ESP_ERROR_CHECK(CST816D_init(i2c_bus));
@@ -157,33 +157,39 @@ void driver_lcd_touch_init(void)
     ESP_ERROR_CHECK(lvgl_port_init(&lvgl_cfg));
 
     // 10. 注册显示器
-    const lvgl_port_display_cfg_t disp_cfg =
-    {.io_handle = io_handle,
-     .panel_handle = panel_handle,
-     .buffer_size = LVGL_BUF_SIZE,
-     .double_buffer = true,
-     .hres = LCD_H_RES,
-     .vres = LCD_V_RES,
-     .monochrome = false,
-     .rotation =
-         {
-             .swap_xy = false,
-             .mirror_x = false,
-             .mirror_y = false,
-         },
-     .flags = {
-         .buff_dma = true,
-         .swap_bytes = true,
+    const lvgl_port_display_cfg_t disp_cfg = {
+        .io_handle = io_handle,
+        .panel_handle = panel_handle,
+        .buffer_size = LVGL_BUF_SIZE,
+        .double_buffer = true,
+        .hres = LCD_H_RES,
+        .vres = LCD_V_RES,
+        .monochrome = false,
+        .rotation = {
+            .swap_xy = false,
+            .mirror_x = false,
+            .mirror_y = false,
+        },
+        .flags = {
+            .buff_dma = true,
+            .swap_bytes = true,
         },
     };
     lv_display_t *disp = lvgl_port_add_disp(&disp_cfg);
     ESP_LOGI(TAG, "Display registered: %dx%d", LCD_H_RES, LCD_V_RES);
 
-    // 11. 注册触摸输入设备（LVGL 9.x 方式）
+    // 11. 注册触摸输入设备
     lv_indev_t *indev = lv_indev_create();
     lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(indev, lvgl_touch_read);
     lv_indev_set_disp(indev, disp);
-
     ESP_LOGI(TAG, "Touch input registered (LVGL 9.x)");
+
+    // 12. 初始化硬件图片解码器（esp_lv_decoder）
+    esp_err_t err = esp_lv_decoder_init(&decoder_handle);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "esp_lv_decoder registered (HW accelerated)");
+    } else {
+        ESP_LOGE(TAG, "Failed to init esp_lv_decoder: %d", err);
+    }
 }
