@@ -42,8 +42,3 @@ CONFIG_SPIRAM_SPEED_80M=y
 CONFIG_SPIRAM_MODE_QUAD=y
 CONFIG_SPIRAM_USE_MALLOC=y
 
-# ==========================================
-# 🚀 5. LVGL 内存与任务优化
-# ==========================================
-CONFIG_LVGL_PORT_TASK_STACK_SIZE=12288
-CONFIG_LV_MEM_CUSTOM=y
