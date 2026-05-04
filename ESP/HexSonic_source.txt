@@ -1,7 +1,7 @@
 ESP-IDF / C++ 代码导出
 ==================================================
-时间: 2026-05-04 17:17:34
-屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png']
+时间: 2026-05-04 20:19:34
+屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'lvgl_img_jpeg_png_test.', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h']
 说明: 仅导出 .c, .h, .cpp, CMakeLists.txt 等源码文件。
 
 
@@ -31,16 +31,21 @@ LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
 │   │   │   📄 esp_lcd_spd2010.h [🚫 已过滤]
 ├── 📁 main/
 │   │   📄 CMakeLists.txt
-│   │   📄 driver_io.c
-│   │   📄 driver_io.h
-│   │   📄 driver_lcd_touch.c
-│   │   📄 driver_lcd_touch.h
+│   │   📄 driver_io.c [🚫 已过滤]
+│   │   📄 driver_io.h [🚫 已过滤]
+│   │   📄 driver_lcd_touch.c [🚫 已过滤]
+│   │   📄 driver_lcd_touch.h [🚫 已过滤]
 │   │   📄 lvgl_img_jpeg_png_test.c
-│   │   📄 lvgl_img_jpeg_png_test.h
+│   │   📄 lvgl_img_jpeg_png_test.h [🚫 已过滤]
+│   │   📄 lvgl_img_random_move_test.c
+│   │   📄 lvgl_img_random_move_test.h
+│   │   📄 lvgl_img_rotate_test.c [🚫 已过滤]
+│   │   📄 lvgl_img_rotate_test.h [🚫 已过滤]
 │   │   📄 main.c
 ├── 📁 spiffs/
 │   │   📄 image.jpg [🚫 已过滤]
 │   │   📄 image.png [🚫 已过滤]
+│   │   📄 image2.png [🚫 已过滤]
 
 ==================================================
 
@@ -76,269 +81,15 @@ PATH: main/CMakeLists.txt
 // ------------------------------------------
 // 📄 CMakeLists.txt
 // ------------------------------------------
-# 📄 main/CMakeLists.txt
 idf_component_register(
-    SRCS "main.c" "driver_io.c" "driver_lcd_touch.c" "lvgl_img_jpeg_png_test.c"
-    # 👇 在下面这行追加 esp_lv_decoder
+    SRCS "main.c" "driver_io.c" "driver_lcd_touch.c"
+         "lvgl_img_jpeg_png_test.c" "lvgl_img_rotate_test.c"
+         "lvgl_img_random_move_test.c"          # <--- 新添加
     PRIV_REQUIRES spi_flash lcd_pro esp_lvgl_port spiffs esp_lv_decoder
     INCLUDE_DIRS "."
 )
 
 spiffs_create_partition_image(storage ../spiffs FLASH_IN_PROJECT)
-
-
-
-PATH: main/driver_io.c
-// ------------------------------------------
-// 📄 driver_io.c
-// ------------------------------------------
-#include "driver_io.h"
-#include "driver/gpio.h"
-
-void driver_io_init(void)
-{
-    gpio_config_t io_conf = {
-        .pin_bit_mask = (1ULL << 15),
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
-    gpio_config(&io_conf);
-    gpio_set_level(15, 1);  // 高电平使能
-}
-
-
-
-PATH: main/driver_io.h
-// ------------------------------------------
-// 📄 driver_io.h
-// ------------------------------------------
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void driver_io_init(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-PATH: main/driver_lcd_touch.c
-// ------------------------------------------
-// 📄 driver_lcd_touch.c
-// ------------------------------------------
-// main/driver_lcd_touch.c
-#include "driver_lcd_touch.h"
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/gpio.h"
-#include "driver/spi_master.h"
-#include "driver/i2c_master.h"
-#include "esp_lcd_panel_io.h"
-#include "esp_lcd_panel_ops.h"
-#include "esp_lcd_panel_vendor.h"
-#include "esp_lcd_spd2010.h"
-#include "CST816D.h"
-#include "esp_lvgl_port.h"
-#include "lvgl.h"
-
-#define TAG "LCD_TOUCH"
-
-// ----------------------- 屏幕引脚定义 -----------------------
-#define LCD_HOST        SPI2_HOST
-#define LCD_CS          35
-#define LCD_SCLK        36
-#define LCD_D0          37
-#define LCD_D1          38
-#define LCD_D2          39
-#define LCD_D3          40
-#define LCD_BK          41
-#define LCD_RST         42
-
-// ----------------------- 触摸引脚定义 -----------------------
-#define TP_I2C_PORT     I2C_NUM_0
-#define TP_SCL          33
-#define TP_SDA          34
-#define TP_RST          47
-// #define TP_INT          4   // 未使用触摸中断引脚
-
-// ----------------------- 屏幕参数 -----------------------
-#define LCD_H_RES       412
-#define LCD_V_RES       412
-#define LCD_BIT_PER_PIXEL  16
-
-#define MAX_TRANSFER_SZ (LCD_H_RES * 80 * sizeof(uint16_t))
-#define LVGL_BUF_LINES  50
-#define LVGL_BUF_SIZE   (LCD_H_RES * LVGL_BUF_LINES)
-
-// ----------------------- 全局句柄 -----------------------
-static esp_lcd_panel_handle_t panel_handle = NULL;
-static esp_lcd_panel_io_handle_t io_handle = NULL;
-static i2c_master_bus_handle_t i2c_bus = NULL;
-
-// ----------------------- 触摸读回调（LVGL 9.x 接口） -----------------------
-static void lvgl_touch_read(lv_indev_t *indev, lv_indev_data_t *data)
-{
-    uint16_t x, y;
-    uint8_t gesture;
-    uint8_t num = CST816D_getTouch(&x, &y, &gesture);
-    if (num > 0) {
-        data->point.x = x;
-        data->point.y = y;
-        data->state = LV_INDEV_STATE_PR;       // 按下状态
-    } else {
-        data->state = LV_INDEV_STATE_REL;      // 释放状态
-    }
-}
-
-// ----------------------- 初始化入口 -----------------------
-void driver_lcd_touch_init(void)
-{
-    // 1. 背光使能
-    gpio_config_t bk_conf = {
-        .pin_bit_mask = (1ULL << LCD_BK),
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
-    gpio_config(&bk_conf);
-    gpio_set_level(LCD_BK, 1);
-
-    // 2. 初始化 SPI 总线（QSPI）
-    spi_bus_config_t buscfg = {
-        .data0_io_num = LCD_D0,
-        .data1_io_num = LCD_D1,
-        .data2_io_num = LCD_D2,
-        .data3_io_num = LCD_D3,
-        .sclk_io_num = LCD_SCLK,
-        .max_transfer_sz = MAX_TRANSFER_SZ,
-        .flags = SPICOMMON_BUSFLAG_MASTER,
-        .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,
-    };
-    ESP_ERROR_CHECK(spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO));
-
-    // 3. 创建面板 IO（QSPI）
-    esp_lcd_panel_io_spi_config_t io_config = {
-        .cs_gpio_num = LCD_CS,
-        .dc_gpio_num = -1,              // QSPI 无 DC
-        .spi_mode = 3,
-        .pclk_hz = 40 * 1000 * 1000,
-        .trans_queue_depth = 10,
-        .user_ctx = NULL,
-        .lcd_cmd_bits = 32,
-        .lcd_param_bits = 8,
-        .flags = {
-            .quad_mode = true,
-        },
-    };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST,
-                                             &io_config, &io_handle));
-
-    // 4. 创建 SPD2010 面板（使用硬件复位引脚）
-    const spd2010_vendor_config_t vendor_config = {
-        .flags = { .use_qspi_interface = 1 },
-    };
-    const esp_lcd_panel_dev_config_t panel_config = {
-        .reset_gpio_num = LCD_RST,      // 硬件复位引脚
-        .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
-        .bits_per_pixel = LCD_BIT_PER_PIXEL,
-        .vendor_config = (void *)&vendor_config,
-    };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_spd2010(io_handle, &panel_config, &panel_handle));
-
-    // 5. 复位 & 初始化面板
-    ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
-
-    // 6. 初始化 I2C 主总线（触摸）
-    i2c_master_bus_config_t i2c_mst_cfg = {
-        .clk_source = I2C_CLK_SRC_DEFAULT,
-        .i2c_port = TP_I2C_PORT,
-        .scl_io_num = TP_SCL,
-        .sda_io_num = TP_SDA,
-        .glitch_ignore_cnt = 7,
-        .flags.enable_internal_pullup = true,
-    };
-    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_cfg, &i2c_bus));
-
-    // 7. 触摸芯片硬件复位
-    gpio_config_t tp_rst_conf = {
-        .pin_bit_mask = (1ULL << TP_RST),
-        .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = GPIO_PULLUP_ENABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE,
-    };
-    gpio_config(&tp_rst_conf);
-    gpio_set_level(TP_RST, 0);
-    vTaskDelay(pdMS_TO_TICKS(10));
-    gpio_set_level(TP_RST, 1);
-    vTaskDelay(pdMS_TO_TICKS(50));   // 等待触摸芯片稳定
-
-    // 8. 初始化触摸芯片
-    ESP_ERROR_CHECK(CST816D_init(i2c_bus));
-
-    // 9. 初始化 LVGL 端口
-    const lvgl_port_cfg_t lvgl_cfg = ESP_LVGL_PORT_INIT_CONFIG();
-    ESP_ERROR_CHECK(lvgl_port_init(&lvgl_cfg));
-
-    // 10. 注册显示器
-    const lvgl_port_display_cfg_t disp_cfg =
-    {.io_handle = io_handle,
-     .panel_handle = panel_handle,
-     .buffer_size = LVGL_BUF_SIZE,
-     .double_buffer = true,
-     .hres = LCD_H_RES,
-     .vres = LCD_V_RES,
-     .monochrome = false,
-     .rotation =
-         {
-             .swap_xy = false,
-             .mirror_x = false,
-             .mirror_y = false,
-         },
-     .flags = {
-         .buff_dma = true,
-         .swap_bytes = true,
-        },
-    };
-    lv_display_t *disp = lvgl_port_add_disp(&disp_cfg);
-    ESP_LOGI(TAG, "Display registered: %dx%d", LCD_H_RES, LCD_V_RES);
-
-    // 11. 注册触摸输入设备（LVGL 9.x 方式）
-    lv_indev_t *indev = lv_indev_create();
-    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-    lv_indev_set_read_cb(indev, lvgl_touch_read);
-    lv_indev_set_disp(indev, disp);
-
-    ESP_LOGI(TAG, "Touch input registered (LVGL 9.x)");
-}
-
-
-
-PATH: main/driver_lcd_touch.h
-// ------------------------------------------
-// 📄 driver_lcd_touch.h
-// ------------------------------------------
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void driver_lcd_touch_init(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 
 
@@ -355,14 +106,9 @@ PATH: main/lvgl_img_jpeg_png_test.c
 
 static const char *TAG = "lvgl_img_test";
 
-#define SPIFFS_MOUNT_POINT "/spiffs"
-#define SPIFFS_PART_LABEL "storage"
-#define LV_FS_LETTER 'S' // 对应 S: 前缀
 
 static lv_obj_t *img_obj = NULL;
 static bool showing_png = true;
-static esp_lv_decoder_handle_t decoder_handle =
-    NULL; // ⬅️ 2. 新增：定义一个全局句柄保存解码器实例
 
 /* -------------------------- 按钮切换回调 -------------------------- */
 static void toggle_img(lv_event_t *e) {
@@ -382,27 +128,6 @@ static void toggle_img(lv_event_t *e) {
 void lvgl_img_jpeg_png_test_init(void) {
   ESP_LOGI(TAG, "===== 开始初始化 =====");
 
-  // 1. 初始化 SPIFFS
-  esp_vfs_spiffs_conf_t spiffs_conf = {.base_path = SPIFFS_MOUNT_POINT,
-                                       .partition_label = SPIFFS_PART_LABEL,
-                                       .max_files = 5,
-                                       .format_if_mount_failed = true};
-  esp_err_t ret = esp_vfs_spiffs_register(&spiffs_conf);
-  if (ret != ESP_OK) {
-    ESP_LOGE(TAG, "SPIFFS 挂载失败: %s", esp_err_to_name(ret));
-    return;
-  }
-  size_t total = 0, used = 0;
-  esp_spiffs_info(SPIFFS_PART_LABEL, &total, &used);
-  ESP_LOGI(TAG, "SPIFFS: 总%u, 已用%u", total, used);
-
-  // 👇 3. 新增：接管 LVGL 解码器！(务必在创建 UI 之前调用)
-  esp_err_t err = esp_lv_decoder_init(&decoder_handle);
-  if (err == ESP_OK) {
-    ESP_LOGI(TAG, "🔥 乐鑫 esp_lv_decoder 注册成功！硬件加速启动！");
-  } else {
-    ESP_LOGE(TAG, "❌ 解码器注册失败: %d", err);
-  }
 
   // 4. 创建 UI
   img_obj = lv_image_create(lv_scr_act());
@@ -426,11 +151,161 @@ void lvgl_img_jpeg_png_test_init(void) {
 
 
 
-PATH: main/lvgl_img_jpeg_png_test.h
+PATH: main/lvgl_img_random_move_test.c
 // ------------------------------------------
-// 📄 lvgl_img_jpeg_png_test.h
+// 📄 lvgl_img_random_move_test.c
 // ------------------------------------------
-// lvgl_img_jpeg_png_test.h
+#include "lvgl_img_random_move_test.h"
+#include "esp_log.h"
+#include "lvgl.h"
+#include "esp_random.h"
+
+static const char *TAG = "bounce_move";
+
+typedef struct {
+    lv_obj_t *obj;
+    float pos_x;
+    float pos_y;
+    float vel_x;
+    float vel_y;
+} moving_obj_t;
+
+#define OBJ_COUNT 2
+static moving_obj_t movers[OBJ_COUNT];
+static lv_timer_t *move_timer = NULL;
+
+// --- 辅助函数：获取随机的偶数速度 (2.0, 4.0, 6.0) ---
+// 保持偶数是为了防止出现 0.5 像素导致的画面撕裂和抖动
+static float get_rand_vel(bool positive) {
+    // 随机生成 1, 2, 3，乘以 2 得到 2, 4, 6
+    float v = (float)(lv_rand(1, 3) * 2);
+    return positive ? v : -v;
+}
+
+static float get_rand_vel_any(void) {
+    float v = (float)(lv_rand(1, 3) * 2);
+    // 50% 概率为正，50% 概率为负
+    return (lv_rand(0, 1) == 0) ? v : -v;
+}
+
+static void move_timer_cb(lv_timer_t *timer)
+{
+    lv_display_t *disp = lv_obj_get_display(movers[0].obj);
+    lv_coord_t screen_w = lv_display_get_horizontal_resolution(disp);
+    lv_coord_t screen_h = lv_display_get_vertical_resolution(disp);
+
+    for (int i = 0; i < OBJ_COUNT; i++) {
+        moving_obj_t *m = &movers[i];
+        lv_coord_t obj_w = lv_obj_get_width(m->obj);
+        lv_coord_t obj_h = lv_obj_get_height(m->obj);
+
+        // 更新位置
+        m->pos_x += m->vel_x;
+        m->pos_y += m->vel_y;
+
+        bool hit_x = false;
+        bool hit_y = false;
+
+        // --- 水平边缘检测与随机反弹 ---
+        if (m->pos_x <= 0) {
+            m->pos_x = 0;
+            m->vel_x = get_rand_vel(true);  // 碰到左边，X速度必须变为正数（向右）
+            hit_x = true;
+        } else if (m->pos_x + obj_w >= screen_w) {
+            m->pos_x = screen_w - obj_w;
+            m->vel_x = get_rand_vel(false); // 碰到右边，X速度必须变为负数（向左）
+            hit_x = true;
+        }
+
+        // --- 垂直边缘检测与随机反弹 ---
+        if (m->pos_y <= 0) {
+            m->pos_y = 0;
+            m->vel_y = get_rand_vel(true);  // 碰到上边，Y速度必须变为正数（向下）
+            hit_y = true;
+        } else if (m->pos_y + obj_h >= screen_h) {
+            m->pos_y = screen_h - obj_h;
+            m->vel_y = get_rand_vel(false); // 碰到下边，Y速度必须变为负数（向上）
+            hit_y = true;
+        }
+
+        // --- 增加随机性：如果只碰到了一个边，把另一个方向的速度也随机改变 ---
+        if (hit_x && !hit_y) {
+            m->vel_y = get_rand_vel_any(); // 碰到左右墙壁时，上下方向随机改变
+        }
+        if (hit_y && !hit_x) {
+            m->vel_x = get_rand_vel_any(); // 碰到上下墙壁时，左右方向随机改变
+        }
+
+        // 应用新坐标
+        lv_obj_set_pos(m->obj, (lv_coord_t)m->pos_x, (lv_coord_t)m->pos_y);
+    }
+
+    // 强制全屏重绘，消除拖影
+    lv_obj_invalidate(lv_scr_act());
+}
+
+void lvgl_img_random_move_test_init(void)
+{
+    lv_rand_set_seed(esp_random());
+    ESP_LOGI(TAG, "启动图片+圆形弹跳移动测试 (修复坐标与随机反弹)");
+
+    // 设置纯黑背景
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, 0);
+
+    // 获取屏幕尺寸
+    lv_display_t *disp = lv_display_get_default();
+    lv_coord_t screen_w = lv_display_get_horizontal_resolution(disp);
+    lv_coord_t screen_h = lv_display_get_vertical_resolution(disp);
+
+    // --- 1. 创建图片 ---
+    lv_obj_t *img = lv_image_create(lv_scr_act());
+    lv_image_set_src(img, "S:image2.png");
+    lv_obj_set_style_opa(img, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_opa(img, LV_OPA_TRANSP, 0);
+    
+    // --- 2. 创建圆形 ---
+    lv_obj_t *circle = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(circle, 80, 80);
+    lv_obj_set_style_radius(circle, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(circle, lv_color_hex(0x2196F3), 0);
+    lv_obj_set_style_border_width(circle, 0, 0);
+
+    // 强制更新布局，以便获取到图片和圆形的真实宽高
+    lv_obj_update_layout(lv_scr_act());
+
+    // --- 3. 初始化图片位置和速度 ---
+    // 【关键修复】：不使用 lv_obj_center，而是手动计算居中坐标，保持左上角对齐(LV_ALIGN_TOP_LEFT)
+    movers[0].obj = img;
+    movers[0].pos_x = (screen_w - lv_obj_get_width(img)) / 2.0f;
+    movers[0].pos_y = (screen_h - lv_obj_get_height(img)) / 2.0f;
+    lv_obj_set_pos(img, (lv_coord_t)movers[0].pos_x, (lv_coord_t)movers[0].pos_y);
+    
+    movers[0].vel_x = get_rand_vel_any();
+    movers[0].vel_y = get_rand_vel_any();
+
+    // --- 4. 初始化圆形位置和速度 ---
+    movers[1].obj = circle;
+    // 让圆形稍微偏离中心一点，避免两个物体完全重叠
+    movers[1].pos_x = (screen_w - lv_obj_get_width(circle)) / 2.0f + 50.0f;
+    movers[1].pos_y = (screen_h - lv_obj_get_height(circle)) / 2.0f - 50.0f;
+    lv_obj_set_pos(circle, (lv_coord_t)movers[1].pos_x, (lv_coord_t)movers[1].pos_y);
+
+    movers[1].vel_x = get_rand_vel_any();
+    movers[1].vel_y = get_rand_vel_any();
+
+    // 创建定时器，16ms 约等于 60FPS
+    move_timer = lv_timer_create(move_timer_cb, 16, NULL);
+    lv_timer_set_repeat_count(move_timer, LV_ANIM_REPEAT_INFINITE);
+}
+
+
+
+PATH: main/lvgl_img_random_move_test.h
+// ------------------------------------------
+// 📄 lvgl_img_random_move_test.h
+// ------------------------------------------
+// lvgl_img_random_move_test.h
 #pragma once
 
 #ifdef __cplusplus
@@ -438,9 +313,10 @@ extern "C" {
 #endif
 
 /**
- * @brief 初始化 SPIFFS 并创建 PNG/JPEG 图片切换测试界面
+ * @brief 初始化图片随机移动测试界面
+ *        image2.png 会在屏幕内连续平滑地随机移动
  */
-void lvgl_img_jpeg_png_test_init(void);
+void lvgl_img_random_move_test_init(void);
 
 #ifdef __cplusplus
 }
@@ -452,21 +328,51 @@ PATH: main/main.c
 // ------------------------------------------
 // 📄 main.c
 // ------------------------------------------
+#include "driver_io.h"
 #include "driver_lcd_touch.h"
-#include "lvgl_img_jpeg_png_test.h"  // 重命名
+#include "esp_log.h"
+#include "esp_lvgl_port.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_lvgl_port.h"
+#include "lvgl_img_jpeg_png_test.h"
+#include "lvgl_img_random_move_test.h" // 添加头文件
+#include "lvgl_img_rotate_test.h"
 
-void app_main(void)
-{
-    driver_lcd_touch_init();
-    lvgl_port_lock(0);
-    lvgl_img_jpeg_png_test_init();   // 新函数名
-    lvgl_port_unlock();
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+#define TAG "main"
+
+void app_main(void) {
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  driver_io_mount_spiffs();
+  driver_lcd_touch_init();
+  lvgl_port_lock(0);
+
+  // 选择要运行的测试，只保留一个避免冲突
+  // lvgl_img_jpeg_png_test_init();
+  lvgl_img_rotate_test_init();
+  // lvgl_img_random_move_test_init(); // 随机移动测试
+
+  lvgl_port_unlock();
+  while (1) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    multi_heap_info_t info;
+    // SRAM 信息
+    heap_caps_get_info(&info, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    uint32_t sram_total =
+        (info.total_free_bytes + info.total_allocated_bytes) / 1024;
+    uint32_t sram_free = info.total_free_bytes / 1024;
+    uint32_t sram_max = info.largest_free_block / 1024;
+    // PSRAM 信息
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    uint32_t psram_total =
+        (info.total_free_bytes + info.total_allocated_bytes) / 1024;
+    uint32_t psram_free = info.total_free_bytes / 1024;
+    uint32_t psram_max = info.largest_free_block / 1024;
+    ESP_LOGI(TAG,
+             "Heap: SRAM total=%uKB free=%uKB max=%uKB | PSRAM total=%uKB "
+             "free=%uKB max=%uKB",
+             sram_total, sram_free, sram_max, psram_total, psram_free,
+             psram_max);
+  }
 }
 
 

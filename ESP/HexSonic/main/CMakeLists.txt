@@ -1,7 +1,8 @@
-# 📄 main/CMakeLists.txt
 idf_component_register(
-    SRCS "main.c" "driver_io.c" "driver_lcd_touch.c" "lvgl_img_jpeg_png_test.c"
-    # 👇 在下面这行追加 esp_lv_decoder
+    SRCS "main.c" "driver_io.c" "driver_lcd_touch.c"
+         "lvgl_img_jpeg_png_test.c" "lvgl_img_rotate_test.c"
+         "lvgl_img_random_move_test.c"
+         "lvgl_font_size_test.c"           # <--- 添加这一行
     PRIV_REQUIRES spi_flash lcd_pro esp_lvgl_port spiffs esp_lv_decoder
     INCLUDE_DIRS "."
 )
