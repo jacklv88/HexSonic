@@ -1,0 +1,49 @@
+# ==========================================
+# 🚀 1. 编译器级别加速 
+# ==========================================
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# ==========================================
+# 🚀 2. 硬件 Cache 优化 (加速 CPU 读写)
+# ==========================================
+CONFIG_ESP32S3_DATA_CACHE_64KB=y
+CONFIG_ESP32S3_DATA_CACHE_LINE_64B=y
+CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB=y
+
+# ==========================================
+# 🚀 3. 系统基础时钟与系统节拍 
+# ==========================================
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_FREERTOS_HZ=1000
+
+# ==========================================
+# 🚀 4. Flash 与 PSRAM 吞吐量及容量优化 (包含 16MB & 自定义分区)
+# ==========================================
+# --- Flash 速度与模式 ---
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+
+# --- Flash 容量配置 (16MB) ---
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+
+# --- 自定义分区表 (Custom Partition Table) ---
+# 开启自定义分区表选项
+CONFIG_PARTITION_TABLE_CUSTOM=y
+# 指定根目录下的自定义分区表文件名为 partitions.csv
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
+# 分区表默认偏移地址通常为 0x8000
+CONFIG_PARTITION_TABLE_OFFSET=0x8000
+
+# --- PSRAM 配置 (针对 2MB) ---
+CONFIG_ESP32S3_SPIRAM_SUPPORT=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_MODE_QUAD=y
+CONFIG_SPIRAM_USE_MALLOC=y
+
+# ==========================================
+# 🚀 5. LVGL 内存与任务优化
+# ==========================================
+CONFIG_LVGL_PORT_TASK_STACK_SIZE=12288
+CONFIG_LV_MEM_CUSTOM=y

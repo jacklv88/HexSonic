@@ -1,0 +1,163 @@
+ESP-IDF / C++ 代码导出
+==================================================
+时间: 2026-05-04 14:17:12
+屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h']
+说明: 仅导出 .c, .h, .cpp, CMakeLists.txt 等源码文件。
+
+
+项目说明:
+说明: esp32s3 的 16MB flash 和 2MB psram的模块. 基于 ESP-idf 5.5.1 版本的工程.
+
+
+LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
+
+
+项目结构:
+------------------------------
+📂 HexSonic/ (Root)
+│   📄 CMakeLists.txt
+│   📄 sdkconfig [🚫 已过滤]
+│   📄 sdkconfig.defaults
+├── 📁 .cache/
+│   ├── 📁 clangd/
+│   │   ├── 📁 index/
+├── 📁 .devcontainer/
+├── 📁 components/
+│   ├── 📁 lcd_pro/
+│   │   │   📄 CMakeLists.txt
+│   │   │   📄 CST816D.c [🚫 已过滤]
+│   │   │   📄 CST816D.h [🚫 已过滤]
+│   │   │   📄 esp_lcd_spd2010.c [🚫 已过滤]
+│   │   │   📄 esp_lcd_spd2010.h [🚫 已过滤]
+├── 📁 main/
+│   │   📄 CMakeLists.txt
+│   │   📄 driver_io.c [🚫 已过滤]
+│   │   📄 driver_io.h [🚫 已过滤]
+│   │   📄 driver_lcd_touch.c [🚫 已过滤]
+│   │   📄 driver_lcd_touch.h [🚫 已过滤]
+│   │   📄 main.c
+
+==================================================
+
+PATH: CMakeLists.txt
+// ------------------------------------------
+// 📄 CMakeLists.txt
+// ------------------------------------------
+# The following lines of boilerplate have to be in your project's
+# CMakeLists in this exact order for cmake to work correctly
+cmake_minimum_required(VERSION 3.16)
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+# "Trim" the build. Include the minimal set of components, main, and anything it depends on.
+idf_build_set_property(MINIMAL_BUILD ON)
+project(HexSonic)
+
+
+
+
+PATH: components/lcd_pro/CMakeLists.txt
+// ------------------------------------------
+// 📄 CMakeLists.txt
+// ------------------------------------------
+idf_component_register(SRCS "CST816D.c" "esp_lcd_spd2010.c"
+                       INCLUDE_DIRS "."
+                       REQUIRES driver esp_lcd
+                       )
+
+
+
+PATH: main/CMakeLists.txt
+// ------------------------------------------
+// 📄 CMakeLists.txt
+// ------------------------------------------
+idf_component_register(SRCS "main.c" "driver_io.c" "driver_lcd_touch.c"
+                       PRIV_REQUIRES spi_flash lcd_pro esp_lvgl_port
+                       INCLUDE_DIRS ".")
+
+
+
+PATH: main/main.c
+// ------------------------------------------
+// 📄 main.c
+// ------------------------------------------
+#include "driver_lcd_touch.h"
+#include "lvgl.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+
+
+void app_main(void)
+{
+    // 初始化屏幕、触摸、LVGL
+    driver_lcd_touch_init();
+
+    // 创建一个简单的 LVGL 界面
+    lv_obj_t *label = lv_label_create(lv_scr_act());
+    lv_label_set_text(label, "Hello HexSonic!");
+    lv_obj_center(label);
+
+
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+
+
+PATH: sdkconfig.defaults
+// ------------------------------------------
+// 📄 sdkconfig.defaults
+// ------------------------------------------
+# ==========================================
+# 🚀 1. 编译器级别加速 
+# ==========================================
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# ==========================================
+# 🚀 2. 硬件 Cache 优化 (加速 CPU 读写)
+# ==========================================
+CONFIG_ESP32S3_DATA_CACHE_64KB=y
+CONFIG_ESP32S3_DATA_CACHE_LINE_64B=y
+CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB=y
+
+# ==========================================
+# 🚀 3. 系统基础时钟与系统节拍 
+# ==========================================
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_FREERTOS_HZ=1000
+
+# ==========================================
+# 🚀 4. Flash 与 PSRAM 吞吐量及容量优化 (包含 16MB & 自定义分区)
+# ==========================================
+# --- Flash 速度与模式 ---
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+
+# --- Flash 容量配置 (16MB) ---
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+
+# --- 自定义分区表 (Custom Partition Table) ---
+# 开启自定义分区表选项
+CONFIG_PARTITION_TABLE_CUSTOM=y
+# 指定根目录下的自定义分区表文件名为 partitions.csv
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
+# 分区表默认偏移地址通常为 0x8000
+CONFIG_PARTITION_TABLE_OFFSET=0x8000
+
+# --- PSRAM 配置 (针对 2MB) ---
+CONFIG_ESP32S3_SPIRAM_SUPPORT=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_MODE_QUAD=y
+CONFIG_SPIRAM_USE_MALLOC=y
+
+# ==========================================
+# 🚀 5. LVGL 内存与任务优化
+# ==========================================
+CONFIG_LVGL_PORT_TASK_STACK_SIZE=12288
+CONFIG_LV_MEM_CUSTOM=y
+
+

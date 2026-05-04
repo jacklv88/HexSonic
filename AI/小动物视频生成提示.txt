@@ -1,0 +1,748 @@
+
+---
+
+### 1. 霸王龙
+**Prompt**
+Full-body T-Rex centered in circular frame, walking forward inside safe zone, cinematic rim lighting, pitch black background, particles around edges, seamless loop. Sound: T-Rex roar only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心亮起一只眼睛的特写光点（抓眼）
+- 1–2s：全身从黑暗中显现，正对镜头走入圆形安全区
+- 2–4s：昂头张嘴
+- 4–6s：发出咆哮（声音爆发点），震荡粒子向外扩散但保持在边缘
+- 6–8s：全身逐渐后退，缩回中心一点眼睛光亮
+**Loop**：回到0秒中心眼睛光点
+
+---
+
+### 2. 海豚
+**Prompt**
+Full-body dolphin in circular composition, leaping from water splash at center, cinematic blue rim lighting on dolphin, pitch black background, subtle water particles, seamless loop. Sound: dolphin clicks and whistles only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心水面突然爆开水花（抓眼）
+- 1–3s：海豚全身跃出，沿圆形内弧线跳跃
+- 3–5s：跃至最高点，身体位于圆心
+- 5–7s：全身回落入水
+- 7–8s：水面恢复平静，仅剩中心水纹
+**Loop**：回到0秒水面爆开
+
+---
+
+### 3. 帝企鹅
+**Prompt**
+Full-body baby emperor penguin centered, waddling slightly within circular safe zone, soft cinematic lighting, pitch black background, fluffy texture, seamless loop. Sound: baby penguin chirps only, no background.
+
+**分镜 (8秒)**
+- 0–1s：企鹅从中心探出脑袋（抓眼）
+- 1–3s：全身出现，向左小步移动（不出安全区）
+- 3–5s：走回中心，面朝镜头
+- 5–6s：张嘴发出啾啾叫声
+- 6–8s：慢慢退回初始探头前的黑暗状态
+**Loop**：重新探头
+
+---
+
+### 4. 非洲象
+**Prompt**
+Full-body African elephant centered, swinging trunk in circular motion, warm cinematic rim light, pitch black background, subtle dust particles near edges, seamless loop. Sound: elephant trumpet only, no background.
+
+**分镜 (8秒)**
+- 0–1s：鼻子从中心位置向上扫过（抓眼）
+- 1–3s：大象全身完整进入圆形视野
+- 3–5s：鼻子顺时针绕圆形安全区大幅度摆动
+- 5–6s：昂起鼻尖发出喇叭般鸣叫
+- 6–8s：全身缓缓后退，鼻子收回中心
+**Loop**：鼻子回到中心准备再次扫动
+
+---
+
+### 5. 大白鲨
+**Prompt**
+Full-body great white shark swimming forward in circular composition, teeth visible, cinematic cold lighting, pitch black background, seamless loop. Sound: shark’s low growl or jaws snap only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心亮起一排牙齿的反光（抓眼）
+- 1–3s：鲨鱼全身从左侧游入圆形画面
+- 3–5s：向镜头方向推进，全身始终完整可见
+- 5–6s：张嘴露出牙齿并发出沉重撕咬声
+- 6–8s：全身后退游出画面直至全黑
+**Loop**：黑暗→牙齿反光再次出现
+
+---
+
+### 6. 雪豹
+**Prompt**
+Full-body snow leopard centered, glowing eyes, cinematic soft lighting on fur, pitch black background, subtle snow-like particles near edges, seamless loop. Sound: snow leopard growl only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心一对眼睛骤然发光（抓眼）
+- 1–3s：全身轮廓渐渐显现，占据圆形安全区
+- 3–5s：身体小幅移动，目光锁定镜头
+- 5–6s：张嘴发出低沉喉音（咆哮）
+- 6–8s：全身逐渐隐入黑暗，眼睛最后消失
+**Loop**：眼睛再次亮起
+
+---
+
+### 7. 座头鲸
+**Prompt**
+Full-body humpback whale swimming upwards in circular frame, tail pushing water, cinematic blue rim light, pitch black background, small bubbles, seamless loop. Sound: whale song note only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心涌起水花与气泡（抓眼）
+- 1–3s：鲸鱼全身从下方缓慢游入圆形内
+- 3–5s：尾部向上抬起，做出拍水预动作
+- 5–6s：尾鳍拍下并伴随一声低沉的鲸歌
+- 6–8s：全身静静下降，水面恢复黑暗
+**Loop**：中心再次涌起水花
+
+---
+
+### 8. 变色龙
+**Prompt**
+Full-body chameleon macro centered, skin flashing vibrant colors, cinematic rim lighting, pitch black background, seamless loop. Sound: subtle tongue snap only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心皮肤突然闪烁霓虹色（抓眼）
+- 1–3s：变色龙全身出现，锁定目标
+- 3–4s：舌头从口中直射中心方向
+- 4–6s：舌头瞬间收回，伴随清脆弹舌声
+- 6–8s：静止并恢复保护色
+**Loop**：皮肤颜色再次闪烁
+
+---
+
+### 9. 北极熊
+**Prompt**
+Full-body polar bear centered, shaking off water, cinematic cool lighting, pitch black background, fine water droplets near edges, seamless loop. Sound: polar bear low grunt only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心水滴飞溅（抓眼）
+- 1–3s：北极熊全身出现，头部剧烈抖动甩水
+- 3–5s：整个身体完成甩动动作，四肢站稳
+- 5–6s：发出低沉咕噜声
+- 6–8s：静止，部分水滴飘散消失
+**Loop**：水滴再次从中心飞溅
+
+---
+
+### 10. 灰狼
+**Prompt**
+Full-body gray wolf centered, head raised howling, cinematic moonlight-style rim light, pitch black background, subtle floating particles, seamless loop. Sound: wolf howl only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心眼睛亮起（抓眼）
+- 1–3s：全身从下方入画，抬头仰天
+- 3–6s：嗥叫声持续扩散，粒子从中心向边缘波动
+- 6–8s：头部回落，全身回到初始站立姿态
+**Loop**：眼睛再次亮起
+
+---
+
+### 11. 老虎
+**Prompt**
+Full-body Bengal tiger centered, walking forward inside circular safe zone, vivid orange and black stripes, cinematic rim lighting, pitch black background, seamless loop. Sound: tiger roar only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心区域条纹突闪（抓眼）
+- 1–2s：老虎全身从黑暗中显现
+- 2–4s：缓慢向镜头走一步，始终全身可见
+- 4–6s：停住直视镜头，张嘴
+- 6–7s：发出咆哮，边缘粒子震动
+- 7–8s：慢慢后退，画面重回条纹亮点
+**Loop**：条纹亮点再次闪现
+
+---
+
+### 12. 猫头鹰
+**Prompt**
+Full-body owl centered in circular frame, large glowing yellow eyes, soft cinematic lighting on feathers, pitch black background, seamless loop. Sound: owl hoot only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心双眼突然睁开（抓眼）
+- 1–3s：全身清晰展现，头部缓慢旋转
+- 3–5s：身体完全静止，紧盯镜头
+- 5–6s：发出深沉“hood”叫声
+- 6–8s：眼睛慢慢闭合，全身羽毛融入黑暗
+**Loop**：眼睛再次睁开
+
+---
+
+### 13. 蓝箭毒蛙
+**Prompt**
+Full-body blue poison dart frog macro centered, luminous skin, cinematic lighting, pitch black background, seamless loop. Sound: short frog croak only, no background.
+
+**分镜 (8秒)**
+- 0–1s：皮肤蓝色荧光骤然增强（抓眼）
+- 1–3s：全身显现，伴随轻微呼吸起伏
+- 3–5s：前腿向前微移
+- 5–6s：喉囊鼓动发出短促蛙鸣
+- 6–8s：静止并维持荧光
+**Loop**：荧光再次增强
+
+---
+
+### 14. 斑马
+**Prompt**
+Full-body zebra running across circular frame, dynamic black and white stripes, cinematic side lighting, pitch black background, seamless loop. Sound: zebra bray only, no background.
+
+**分镜 (8秒)**
+- 0–1s：条纹从中心快速掠过（抓眼）
+- 1–3s：斑马全身进入圆形画面，横向奔跑
+- 3–5s：加速奔跑，条纹出现动态模糊
+- 5–6s：头部上扬发出嘶鸣
+- 6–8s：跑出画面边缘，回归纯黑
+**Loop**：条纹再次从中心掠过
+
+---
+
+### 15. 考拉
+**Prompt**
+Full-body koala centered hugging a thin branch, soft warm lighting, pitch black background, fluffy texture, seamless loop. Sound: koala grunt only, no background.
+
+**分镜 (8秒)**
+- 0–1s：大鼻子和脸贴向镜头（抓眼）
+- 1–3s：全身出现，紧抱树枝
+- 3–5s：缓慢咀嚼动作
+- 5–6s：发出轻微呼噜声
+- 6–8s：停止动作，保持静止
+**Loop**：鼻子再次靠近镜头
+
+---
+
+### 16. 海马
+**Prompt**
+Full-body golden seahorse floating centered, glowing edges, macro detail, pitch black background, tiny bubbles, seamless loop. Sound: soft clicking sound only, no background.
+
+**分镜 (8秒)**
+- 0–1s：身体边缘金光增强（抓眼）
+- 1–3s：全身在水中缓慢漂浮转动
+- 3–5s：小鳍快速振动
+- 5–6s：从口部冒出一串气泡并发出轻声嗒嗒
+- 6–8s：静止飘浮
+**Loop**：金光再次增强
+
+---
+
+### 17. 三角龙
+**Prompt**
+Full-body Triceratops centered, horns and frill prominent inside safe zone, cinematic lighting, pitch black background, seamless loop. Sound: deep grunt only, no background.
+
+**分镜 (8秒)**
+- 0–1s：三只角和头盾边缘同时发光（抓眼）
+- 1–3s：全身进入画面
+- 3–5s：前蹄刨地动作
+- 5–6s：猛然向前短冲并发出低沉吼声
+- 6–8s：停住，维持姿势
+**Loop**：角重新发光
+
+---
+
+### 18. 长颈鹿
+**Prompt**
+Full-body giraffe centered, bending neck slightly to fit in frame, long eyelashes, warm cinematic lighting, pitch black background, seamless loop. Sound: giraffe hum only, no background.
+
+**分镜 (8秒)**
+- 0–1s：眼睛特写眨一下（抓眼）
+- 1–3s：全身显现，脖子优雅弯曲
+- 3–5s：嘴巴开始慢慢咀嚼
+- 5–6s：停下咀嚼，发出低沉嗡嗡声
+- 6–8s：全身回到初始静立姿势
+**Loop**：眼睛再次眨动
+
+---
+
+### 19. 虎鲸
+**Prompt**
+Full-body orca breaching in circular composition, strong black and white contrast, cinematic lighting, pitch black background, seamless loop. Sound: orca call only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心水柱喷出（抓眼）
+- 1–3s：虎鲸全身跃出水面，完全进入圆形视野
+- 3–5s：在空中滑行
+- 5–6s：落水前喷出水雾并发出清脆叫声
+- 6–8s：沉入黑暗水中
+**Loop**：水柱再次喷出
+
+---
+
+### 20. 树懒
+**Prompt**
+Full-body sloth centered hanging from a branch, soft warm lighting, pitch black background, cute expression, seamless loop. Sound: sloth squeak only, no background.
+
+**分镜 (8秒)**
+- 0–1s：脸上露出萌笑（抓眼）
+- 1–3s：全身入画，缓慢摆荡
+- 3–5s：面向镜头，抬起一只爪子
+- 5–6s：轻声吱叫
+- 6–8s：静止悬挂
+**Loop**：回到微笑瞬间
+
+---
+
+### 21. 蝴蝶
+**Prompt**
+Full-body butterfly centered, glowing color wings, cinematic lighting, pitch black background, subtle floating scales, seamless loop. Sound: soft flutter wingbeat only, no background.
+
+**分镜 (8秒)**
+- 0–1s：翅膀突然放射彩光（抓眼）
+- 1–3s：双翅完全展开，全身清晰
+- 3–5s：轻微扇动，产生柔和扑翅音
+- 5–6s：停在中心，翅膀缓缓开合
+- 6–8s：翅膀合拢，光芒减弱
+**Loop**：翅膀再次放射光芒
+
+---
+
+### 22. 蜜蜂
+**Prompt**
+Full-body bee hovering centered macro, detailed translucent wings, cinematic lighting, pitch black background, seamless loop. Sound: buzzing only, no background.
+
+**分镜 (8秒)**
+- 0–1s：快速飞入中心（抓眼带嗡声）
+- 1–3s：全身悬停，翅膀高速振动
+- 3–5s：维持悬停，嗡嗡声增强
+- 5–6s：声波般震动扩散到边缘
+- 6–8s：迅速飞出画面
+**Loop**：再次飞入中心
+
+---
+
+### 23. 螳螂
+**Prompt**
+Full-body praying mantis centered, forelegs raised, dramatic lighting, pitch black background, seamless loop. Sound: sharp snap of forelegs only, no background.
+
+**分镜 (8秒)**
+- 0–1s：前臂向上展开（抓眼）
+- 1–3s：全身静止观察
+- 3–4s：前臂极速出击，伴随清脆捕捉音
+- 4–6s：缓慢收回前臂
+- 6–8s：恢复祈祷姿态
+**Loop**：前臂再次展开
+
+---
+
+### 24. 蜘蛛
+**Prompt**
+Full-body spider centered crawling, dramatic shadows, pitch black background, subtle silk thread, seamless loop. Sound: soft thread pulling sound only, no background.
+
+**分镜 (8秒)**
+- 0–1s：突然出现在中心（抓眼）
+- 1–3s：全身向前爬行数步
+- 3–5s：停下，抬起前肢
+- 5–6s：吐丝并向边缘拉伸，发出细丝声
+- 6–8s：后退消失
+**Loop**：再次突然出现
+
+---
+
+### 25. 萤火虫
+**Prompt**
+Multiple fireflies glowing in circular flight pattern, full-body insects, pitch black background, soft cinematic glow, seamless loop. Sound: subtle high-pitched twinkles only, no background.
+
+**分镜 (8秒)**
+- 0–1s：中心集体发光（抓眼）
+- 1–3s：数只萤火虫散开，展现全身小飞虫
+- 3–5s：不规则闪烁，飞舞路径呈圆形
+- 5–6s：再次聚向中心并发出轻灵叮铃声
+- 6–8s：渐暗
+**Loop**：重新集体亮起
+
+---
+
+### 26. 甲虫
+**Prompt**
+Full-body metallic beetle centered macro, shiny iridescent shell, cinematic lighting, pitch black background, seamless loop. Sound: wing case snap only, no background.
+
+**分镜 (8秒)**
+- 0–1s：甲壳反光强烈闪烁（抓眼）
+- 1–3s：全身缓慢爬行
+- 3–5s：停下，鞘翅微张
+- 5–6s：内翅高速振动，发出咔嗒声
+- 6–8s：合拢鞘翅，静止
+**Loop**：反光再次闪烁
+
+---
+
+### 27. 蝎子
+**Prompt**
+Full-body scorpion centered, raised tail with stinger, dramatic lighting, pitch black background, seamless loop. Sound: sharp sting strike only, no background.
+
+**分镜 (8秒)**
+- 0–1s：尾部高高竖起（抓眼）
+- 1–3s：全身横移两步
+- 3–4s：尾部快速刺向前方，发出咻声
+- 4–6s：缓缓收回尾部
+- 6–8s：静止防御姿态
+**Loop**：尾部回到高举状态
+
+---
+
+### 28. 龙虾
+**Prompt**
+Full-body lobster centered underwater, claws raised, cinematic rim light, pitch black background, small bubbles, seamless loop. Sound: claw snap only, no background.
+
+**分镜 (8秒)**
+- 0–1s：双钳张开（抓眼）
+- 1–3s：全身清晰，缓步移动
+- 3–5s：挥动钳子做出示威动作
+- 5–6s：双钳猛然闭合，发出响亮的咔嚓声，冒出气泡
+- 6–8s：停住
+**Loop**：双钳再次张开
+
+---
+
+### 29. 青蛙
+**Prompt**
+Full-body frog centered macro, tongue capture motion, cinematic lighting, pitch black background, seamless loop. Sound: frog ribbit only, no background.
+
+**分镜 (8秒)**
+- 0–1s：舌头瞬间弹出（抓眼）
+- 1–3s：收回舌头并吞咽
+- 3–5s：腹部呼吸起伏
+- 5–6s：鼓膜振动发出呱叫声
+- 6–8s：静止
+**Loop**：再次弹舌
+
+---
+
+### 30. 蜻蜓
+**Prompt**
+Full-body dragonfly centered hovering macro, transparent wings with light reflections, cinematic lighting, pitch black background, seamless loop. Sound: rapid wing rustle only, no background.
+
+**分镜 (8秒)**
+- 0–1s：四翼同时闪光（抓眼）
+- 1–3s：全身悬停，翅膀轻颤
+- 3–5s：水平短距离快速移动
+- 5–6s：急停于中心，发出细微振翅摩擦音
+- 6–8s：静止飘浮
+**Loop**：翅膀再次闪光
+
+
+
+---
+
+### 🐶 31. 金毛寻回犬（圆屏版）
+**Prompt**
+Full-body Golden Retriever centered, happily wagging tail, warm cinematic lighting, pitch black background, soft fur details, seamless loop. Sound: Golden Retriever happy bark only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现摇得像风扇的尾巴（抓眼）
+- 1–3s：金毛全身出现，开心地吐着舌头，在圆内原地踏步
+- 3–5s：尾巴从左摇到右，整个身体跟着扭
+- 5–6s：张嘴发出一声清脆响亮的“汪！”
+- 6–8s：慢慢趴下，下巴贴地，眼睛向上看，只剩尾巴轻轻摇
+**Loop关键**：尾巴摇动频率变快，重新衔接0秒
+
+---
+
+### ☁️ 32. 萨摩耶（圆屏版）
+**Prompt**
+Full-body Samoyed centered, signature Samoyed smile, fluffy white coat, soft cinematic lighting, pitch black background, floating tiny snow-like particles, seamless loop. Sound: Samoyed soft “woo” only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一张经典的微笑脸（抓眼）
+- 1–3s：全身入画，蓬松的白毛清晰可见
+- 3–5s：高兴地转一个圈，尾巴卷在背上
+- 5–6s：头一歪，发出又软又萌的“呜呜”声
+- 6–8s：安静坐下，朝镜头咧嘴喘气微笑
+**Loop关键**：笑容瞬间灿烂度还原到0秒状态
+
+---
+
+### 🦊 33. 赤狐（圆屏版）
+**Prompt**
+Full-body red fox centered, bushy tail curling into circle, sharp but cute expression, cinematic rim lighting, pitch black background, subtle autumn-like particles near edges, seamless loop. Sound: fox gekkering call only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然亮起两团狡黠的狐狸眼睛（抓眼）
+- 1–3s：全身出现，蓬松的大尾巴顺势扫进画面，尾巴完美贴合圆形边缘
+- 3–5s：狐狸轻盈地绕圆心小跑半圈
+- 5–6s：停下，嘴巴微张，发出几声短促又嘹亮的“嘎嘎”叫声
+- 6–8s：优雅地坐下，尾巴围住身体，眼睛缓缓眯起
+**Loop关键**：狐狸眼睛再次完全睁开，回到0秒发亮状态
+
+---
+
+### 🦜 34. 金刚鹦鹉（圆屏版）
+**Prompt**
+Full-body scarlet macaw centered, spreading vibrant red and blue wings inside circular safe zone, cinematic lighting, pitch black background, a few softly falling bright feathers, seamless loop. Sound: macaw squawk only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然炸开一团红蓝黄高饱和羽毛（抓眼）
+- 1–3s：鹦鹉全身侧立枝头，华丽的尾羽自然垂下，保持在画面内
+- 3–5s：双翅完全展开，做出即将飞起的动作（仍在圆内）
+- 5–6s：头一昂，发出一声特别有穿透力的“嘎啊啊”鸣叫
+- 6–8s：收起翅膀，侧头用喙整理胸前羽毛
+**Loop关键**：整理完羽毛的瞬间，镜头重新拉回到羽毛炸开的特效
+
+---
+
+### 🐥 35. 小黄鸡（圆屏版）
+**Prompt**
+Full-body fluffy yellow chick centered, tiny wings flapping, soft warm lighting, pitch black background, adorable fluffy texture, seamless loop. Sound: baby chick cheeping only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然冒出一团毛茸茸的黄色小绒球（抓眼）
+- 1–3s：小鸡全身出现，摇摇晃晃往前跳两步
+- 3–5s：张开极小的翅膀，飞快地扑扇，带起几根小绒毛
+- 5–6s：啾啾啾连续叫三声
+- 6–8s：一屁股坐在地上，歪头看着镜头，偶尔抖一下绒毛
+**Loop关键**：坐地小鸡重新跳起，迎回0秒的绒球状态
+
+
+
+好的，继续补充更多**小朋友日常最喜欢的动物**，全部严格按你的规则来：
+
+- ✅ **纯黑背景**
+- ✅ **动物全身入画（圆内安全区）**
+- ✅ **只有该动物的标志性叫声，无任何环境背景音**
+- ✅ **圆形屏 UI 动线：中心吸引 → 外扩 → 回归中心**
+- ✅ **无缝 Loop 设计**
+
+---
+
+### 🐱 36. 家猫（橘猫/英短）
+**Prompt**
+Full-body cute domestic cat centered, round face, big eyes, soft cinematic warm lighting, pitch black background, whiskers detail, seamless loop. Sound: cat meow only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一双放大的猫眼（抓眼）
+- 1–3s：猫咪全身出现，抬起一只前爪轻轻洗脸
+- 3–5s：向镜头走近一步，尾巴高高竖起，尾尖弯成小钩
+- 5–6s：歪头张嘴，发出一声软萌的“喵～”
+- 6–8s：慢慢趴下蜷成圆形，尾巴盖住鼻子
+**Loop关键**：蜷成一团的猫再次抬头，重新睁开大眼睛
+
+---
+
+### 🐰 37. 小兔子
+**Prompt**
+Full-body fluffy bunny centered, long ears upright, soft warm lighting, pitch black background, tiny nose twitching, seamless loop. Sound: rabbit soft purring/grunt only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现快速抽动的小鼻子（抓眼）
+- 1–3s：全身露出，两只长耳朵警觉地转动
+- 3–5s：小跳一步，用后腿站起来，前爪缩在胸前
+- 5–6s：鼻子快速抽动，发出轻轻的“咕咕”哼哼声
+- 6–8s：四脚落地，恢复蹲坐姿势，耳朵缓缓放下
+**Loop关键**：耳朵再次竖起，鼻子开始抽动
+
+---
+
+### 🐥 38. 小鸭子
+**Prompt**
+Full-body yellow duckling centered, slightly wobbling, soft fluffy texture, warm lighting, pitch black background, tiny water ripples only at feet, seamless loop. Sound: duckling peeping/quacking only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然冒出一个小黄脑袋（抓眼）
+- 1–3s：全身摇摇摆摆走入圆形中央
+- 3–5s：小翅膀快速扑扇几下，原地转一圈
+- 5–6s：嘴巴张成小三角，发出清脆的“嘎嘎嘎”三声
+- 6–8s：一屁股坐下，缩成一个小黄毛球
+**Loop关键**：毛球重新抬起头，再次冒出小脑袋
+
+---
+
+### 🐼 39. 大熊猫
+**Prompt**
+Full-body giant panda cub centered, sitting and chewing bamboo, cinematic warm lighting, pitch black background, soft black‐and‐white fur, seamless loop. Sound: panda bleat only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一对黑眼圈大眼睛（抓眼）
+- 1–3s：熊猫宝宝全身入画，怀里抱着一根竹子
+- 3–5s：专心低头啃竹子，嘴巴不停嚼动
+- 5–6s：停下咀嚼，抬头发出像小羊一样的“咩～”叫声
+- 6–8s：打个滚，四脚朝天露出圆肚皮
+**Loop关键**：再次翻身坐起，重新看向镜头，眼睛发亮
+
+---
+
+### 🐴 40. 小马（小矮马/pony）
+**Prompt**
+Full-body cute pony centered, short legs, fluffy mane, soft cinematic lighting, pitch black background, tiny dust particles near hooves, seamless loop. Sound: pony whinny only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然有马蹄轻踏的光点（抓眼）
+- 1–3s：小马全身出现，小跑两步进入圆形中心
+- 3–5s：甩动鬃毛，前蹄轻轻刨地
+- 5–6s：昂起头，发出一声短促清脆的嘶鸣
+- 6–8s：安静下来，低下头轻轻蹭镜头方向
+**Loop关键**：再次抬起头，小跑到初始光点位置
+
+---
+
+### 🐶 41. 柯基犬
+**Prompt**
+Full-body corgi centered, iconic round butt and short legs, happy expression, cinematic lighting, pitch black background, seamless loop. Sound: corgi bark only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心先出现一个不停摇摆的蜜桃臀（抓眼）
+- 1–3s：柯基全身转过来说，吐着舌头，大耳朵支棱着
+- 3–5s：迈着小短腿横向跳两步，身体扭成波浪
+- 5–6s：挺胸发出一声自信的“汪呜～”
+- 6–8s：一骨碌翻倒，露出肚皮，四脚朝天卖萌
+**Loop关键**：翻身爬起，屁股再次对准镜头开始摇
+
+---
+
+### 🐿️ 42. 小松鼠
+**Prompt**
+Full-body squirrel centered, holding a nut, bushy tail curled over body, warm cinematic lighting, pitch black background, seamless loop. Sound: squirrel chirping/chattering only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一颗松果和两只小爪子（抓眼）
+- 1–3s：松鼠全身显现，大尾巴翘得比头还高
+- 3–5s：快速转动松果，用门牙磕开，发出细微咔嚓声
+- 5–6s：停下动作，发出“吱吱咯咯”的叫声
+- 6–8s：把松果抱在怀里，左右警惕张望，尾巴轻轻抖动
+**Loop关键**：松果再次被举到镜头前方，重新吸引视线
+
+---
+
+### 🦭 43. 小海豹
+**Prompt**
+Full-body baby seal centered, lying on ice, big round eyes, soft cinematic lighting, pitch black background, subtle ice sparkle particles, seamless loop. Sound: baby seal trill/call only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一双水汪汪的大圆眼（抓眼）
+- 1–3s：小海豹全身出现，像糯米团子一样趴在冰面上
+- 3–5s：抬起一只前鳍笨拙地拍打肚皮
+- 5–6s：张嘴发出“呜呜～”的长音叫声
+- 6–8s：满足地打了个滚，缩成白色毛球
+**Loop关键**：毛球重新展开，眼睛再次亮起
+
+---
+
+### 🦚 44. 孔雀（开屏版）
+**Prompt**
+Full-body peacock centered, tail feathers fanned out within circular safe zone, iridescent eyes on feathers, cinematic lighting, pitch black background, seamless loop. Sound: peacock call only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然亮起孔雀翎眼状的蓝绿色闪光（抓眼）
+- 1–3s：孔雀全身出现，尾屏缓缓打开，完美填充圆形区域
+- 3–5s：身体原地优雅转半圈，尾屏随之轻微抖动
+- 5–6s：昂头发出高亢嘹亮的“嘎啊–嘎啊”鸣叫
+- 6–8s：尾屏慢慢收拢，身体重新面向镜头
+**Loop关键**：重新开始打开尾屏，闪光重现
+
+---
+
+### 🐷 45. 小猪
+**Prompt**
+Full-body cute pink piglet centered, round body, curly tail, soft lighting, pitch black background, tiny mud particle details near feet, seamless loop. Sound: piglet oinking only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一个不停画圈的小卷尾巴（抓眼）
+- 1–3s：小猪全身出现，粉嫩鼻子在地上拱呀拱
+- 3–5s：小跑几步到镜头前，耳朵一扇一扇
+- 5–6s：昂头发出奶声奶气的“哼哼～”声
+- 6–8s：一骨碌躺下露出圆滚滚的肚皮，尾巴还在摇
+**Loop关键**：翻身站起，尾巴重新开始画圈
+
+---
+
+### 🐑 46. 小羊
+**Prompt**
+Full-body lamb centered, fluffy white wool, soft warm lighting, pitch black background, tiny meadow flower particles near edges, seamless loop. Sound: lamb baa only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一对垂下来的软耳朵（抓眼）
+- 1–3s：小羊全身入画，四条小细腿在原地轻跳
+- 3–5s：低下头假装要吃草，然后猛一抬头
+- 5–6s：嘴巴一张，发出清脆响亮的“咩～”
+- 6–8s：乖乖坐下，把头歪向一边，慢慢眨眼睛
+**Loop关键**：头正回来，再次竖起软耳朵
+
+---
+
+
+
+
+
+### 🐹 47. 仓鼠（圆屏版）
+**Prompt**
+Full-body hamster centered, stuffing cheeks with seeds, round fluffy body, soft warm cinematic lighting, pitch black background, seamless loop. Sound: hamster squeaking/soft chattering only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然冒出两个塞得鼓鼓的腮帮子（抓眼）
+- 1–3s：仓鼠全身出现，用小爪子捧着一颗瓜子快速啃
+- 3–5s：把瓜子塞进嘴里，腮帮子肉眼可见地变大一圈
+- 5–6s：停下动作，嘴巴微张，发出一串细细的“吱吱吱”叫声
+- 6–8s：缩成一个完美的毛球，小鼻子从球里探出来抽动
+**Loop关键**：毛球重新展开，腮帮子再次被塞满，回到0秒状态
+
+---
+
+### 🦢 48. 天鹅（圆屏版）
+**Prompt**
+Full-body swan centered, gliding gracefully, neck curved in S-shape, pure white feathers, pitch black background, subtle dark water ripples beneath only, seamless loop. Sound: swan trumpeting call only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然亮起一抹纯白反光（抓眼）
+- 1–3s：天鹅全身优雅滑入圆形画面，长颈弯曲成心形
+- 3–5s：缓慢原地旋转一圈，翅膀微微张开保持平衡
+- 5–6s：仰头朝天，发出一声嘹亮悠长的“呜——呜——”鸣叫
+- 6–8s：恢复优雅滑行姿态，颈重新弯曲，水面涟漪缓缓消失
+**Loop关键**：涟漪消散后，那抹白色反光再次出现在中心
+
+---
+
+### 🦔 49. 小刺猬（圆屏版）
+**Prompt**
+Full-body cute hedgehog centered, tiny pointed snout, soft spines visible, warm cinematic lighting, pitch black background, a few tiny autumn leaf particles near edges, seamless loop. Sound: hedgehog soft snuffling/grunting only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心出现一个不停抽动的小黑鼻子（抓眼）
+- 1–3s：刺猬全身显现，迈着小短腿缓慢向前走两步
+- 3–5s：发现镜头，立刻缩成一个圆圆的刺球
+- 5–6s：刺球微微颤动，从缝隙里探出鼻子，发出轻轻的“哼哼”声
+- 6–8s：确认安全后重新展开，恢复爬行姿态
+**Loop关键**：完全展开的瞬间，小鼻子再次贴近镜头，开始抽动
+
+---
+
+### 🦌 50. 小鹿（圆屏版）
+**Prompt**
+Full-body fawn centered, spotted coat, long slender legs, gentle large eyes, soft cinematic lighting, pitch black background, a few floating light motes like forest dust, seamless loop. Sound: fawn bleating only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一对超大的、湿漉漉的眼睛（抓眼）
+- 1–3s：小鹿全身入画，四条细腿有些站不稳似的轻轻抖动
+- 3–5s：试探性地向镜头方向走一小步，低头又迅速抬起
+- 5–6s：小嘴张开，发出一声软糯的“咩～咩”叫声
+- 6–8s：慢慢弯曲前腿趴下，把头枕在前蹄上，眨眼睛
+**Loop关键**：再次睁开眼睛并站起来，迎回0秒的大眼睛特写
+
+---
+
+### 🦙 51. 羊驼（圆屏版）
+**Prompt**
+Full-body alpaca centered, fluffy cream-colored wool, long neck, cute curious expression, soft cinematic lighting, pitch black background, seamless loop. Sound: alpaca humming only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然出现一团蓬松爆炸的刘海（抓眼）
+- 1–3s：羊驼全身出现，脑袋好奇地歪向一边，大耳朵转向镜头
+- 3–5s：向前慢悠悠走两步，脖子前后轻轻晃动
+- 5–6s：张开嘴露出两颗门牙，发出温柔的“嗯～哼～”哼鸣声
+- 6–8s：停下咀嚼空气，然后默默后退两步，恢复端正站姿
+**Loop关键**：再次歪头，刘海弹回眼前，重新遮住脑门
+
+---
+
+### 🦩 52. 火烈鸟（圆屏版）
+**Prompt**
+Full-body flamingo centered, one leg raised elegantly, vibrant pink feathers, cinematic lighting, pitch black background, subtle circular water ripple beneath single leg, seamless loop. Sound: flamingo honking only, no background noise.
+
+**分镜 (8秒)**
+- 0–1s：中心突然亮起一团柔和的粉色光泽（抓眼）
+- 1–3s：火烈鸟全身优雅站立，修长的脖子弯曲成一个流畅的“S”形
+- 3–5s：缓缓抬起一条腿，单腿独立，全身保持完美平衡
+- 5–6s：弯下脖子，嘴巴微张，发出一声略带沙哑的“嘎～昂”叫声
+- 6–8s：放下腿，用喙优雅地整理胸前羽毛
+**Loop关键**：整理完羽毛后重新抬腿，粉色光泽再次增强
+
+---
+
+还需要继续补吗？比如**小浣熊、耳廓狐、水獭、柴犬、羊驼已经有了、蜜袋鼯、龙猫**这些也都非常受小孩欢迎，我可以继续补到 60 号甚至更多。
