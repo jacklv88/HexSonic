@@ -1,7 +1,7 @@
 ESP-IDF / C++ 代码导出
 ==================================================
-时间: 2026-05-04 20:19:34
-屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'lvgl_img_jpeg_png_test.', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h']
+时间: 2026-05-04 21:07:02
+屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'lvgl_img_jpeg_png_test.', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h']
 说明: 仅导出 .c, .h, .cpp, CMakeLists.txt 等源码文件。
 
 
@@ -35,10 +35,12 @@ LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
 │   │   📄 driver_io.h [🚫 已过滤]
 │   │   📄 driver_lcd_touch.c [🚫 已过滤]
 │   │   📄 driver_lcd_touch.h [🚫 已过滤]
+│   │   📄 lvgl_font_size_test.c
+│   │   📄 lvgl_font_size_test.h
 │   │   📄 lvgl_img_jpeg_png_test.c
 │   │   📄 lvgl_img_jpeg_png_test.h [🚫 已过滤]
-│   │   📄 lvgl_img_random_move_test.c
-│   │   📄 lvgl_img_random_move_test.h
+│   │   📄 lvgl_img_random_move_test.c [🚫 已过滤]
+│   │   📄 lvgl_img_random_move_test.h [🚫 已过滤]
 │   │   📄 lvgl_img_rotate_test.c [🚫 已过滤]
 │   │   📄 lvgl_img_rotate_test.h [🚫 已过滤]
 │   │   📄 main.c
@@ -84,12 +86,120 @@ PATH: main/CMakeLists.txt
 idf_component_register(
     SRCS "main.c" "driver_io.c" "driver_lcd_touch.c"
          "lvgl_img_jpeg_png_test.c" "lvgl_img_rotate_test.c"
-         "lvgl_img_random_move_test.c"          # <--- 新添加
+         "lvgl_img_random_move_test.c"
+         "lvgl_font_size_test.c"           # <--- 添加这一行
     PRIV_REQUIRES spi_flash lcd_pro esp_lvgl_port spiffs esp_lv_decoder
     INCLUDE_DIRS "."
 )
 
 spiffs_create_partition_image(storage ../spiffs FLASH_IN_PROJECT)
+
+
+
+PATH: main/lvgl_font_size_test.c
+// ------------------------------------------
+// 📄 lvgl_font_size_test.c
+// ------------------------------------------
+#include "lvgl_font_size_test.h"
+#include "esp_log.h"
+#include "lvgl.h"
+
+
+static const char *TAG = "font_test";
+static lv_obj_t *label;
+static lv_obj_t *info_label;
+
+static int font_size = 24;       // 初始大小
+static lv_font_t *ttf_font = NULL;
+
+static void update_font(void)
+{
+    if (ttf_font) {
+        lv_tiny_ttf_destroy(ttf_font);
+    }
+
+    // 替换为你的 ttf 文件路径或数组
+    ttf_font = lv_tiny_ttf_create_file("S:yefont.ttf", font_size);
+    if (!ttf_font) {
+        ESP_LOGE(TAG, "Failed to create TTF font");
+        return;
+    }
+
+    lv_obj_set_style_text_font(label, ttf_font, 0);
+    lv_obj_center(label);
+
+    lv_label_set_text_fmt(info_label, "Size: %d px", font_size);
+}
+
+static void btn_plus_cb(lv_event_t *e)
+{
+    if (font_size < 60) {
+        font_size += 4;
+        update_font();
+    }
+}
+
+static void btn_minus_cb(lv_event_t *e)
+{
+    if (font_size > 8) {
+        font_size -= 4;
+        update_font();
+    }
+}
+
+void lvgl_font_size_test_init(void){
+
+    lv_obj_t *scr = lv_scr_act();
+    lv_obj_clean(scr);
+
+    label = lv_label_create(scr);
+    lv_label_set_text(label, "Hello LVGL!");
+    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+
+    info_label = lv_label_create(scr);
+    lv_obj_align(info_label, LV_ALIGN_TOP_MID, 0, 20);
+
+    lv_obj_t *btn_minus = lv_btn_create(scr);
+    lv_obj_set_size(btn_minus, 60, 40);
+    lv_obj_align(btn_minus, LV_ALIGN_BOTTOM_MID, -60, -30);
+    lv_obj_t *lab_minus = lv_label_create(btn_minus);
+    lv_label_set_text(lab_minus, "-");
+    lv_obj_center(lab_minus);
+    lv_obj_add_event_cb(btn_minus, btn_minus_cb, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *btn_plus = lv_btn_create(scr);
+    lv_obj_set_size(btn_plus, 60, 40);
+    lv_obj_align(btn_plus, LV_ALIGN_BOTTOM_MID, 60, -30);
+    lv_obj_t *lab_plus = lv_label_create(btn_plus);
+    lv_label_set_text(lab_plus, "+");
+    lv_obj_center(lab_plus);
+    lv_obj_add_event_cb(btn_plus, btn_plus_cb, LV_EVENT_CLICKED, NULL);
+
+    update_font();   // 初次渲染
+}
+
+
+
+PATH: main/lvgl_font_size_test.h
+// ------------------------------------------
+// 📄 lvgl_font_size_test.h
+// ------------------------------------------
+// lvgl_font_size_test.h
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief 初始化字体缩放测试界面
+ *        使用两个按钮（+/-）连续放大/缩小屏幕中央的文字
+ */
+void lvgl_font_size_test_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 
@@ -151,179 +261,6 @@ void lvgl_img_jpeg_png_test_init(void) {
 
 
 
-PATH: main/lvgl_img_random_move_test.c
-// ------------------------------------------
-// 📄 lvgl_img_random_move_test.c
-// ------------------------------------------
-#include "lvgl_img_random_move_test.h"
-#include "esp_log.h"
-#include "lvgl.h"
-#include "esp_random.h"
-
-static const char *TAG = "bounce_move";
-
-typedef struct {
-    lv_obj_t *obj;
-    float pos_x;
-    float pos_y;
-    float vel_x;
-    float vel_y;
-} moving_obj_t;
-
-#define OBJ_COUNT 2
-static moving_obj_t movers[OBJ_COUNT];
-static lv_timer_t *move_timer = NULL;
-
-// --- 辅助函数：获取随机的偶数速度 (2.0, 4.0, 6.0) ---
-// 保持偶数是为了防止出现 0.5 像素导致的画面撕裂和抖动
-static float get_rand_vel(bool positive) {
-    // 随机生成 1, 2, 3，乘以 2 得到 2, 4, 6
-    float v = (float)(lv_rand(1, 3) * 2);
-    return positive ? v : -v;
-}
-
-static float get_rand_vel_any(void) {
-    float v = (float)(lv_rand(1, 3) * 2);
-    // 50% 概率为正，50% 概率为负
-    return (lv_rand(0, 1) == 0) ? v : -v;
-}
-
-static void move_timer_cb(lv_timer_t *timer)
-{
-    lv_display_t *disp = lv_obj_get_display(movers[0].obj);
-    lv_coord_t screen_w = lv_display_get_horizontal_resolution(disp);
-    lv_coord_t screen_h = lv_display_get_vertical_resolution(disp);
-
-    for (int i = 0; i < OBJ_COUNT; i++) {
-        moving_obj_t *m = &movers[i];
-        lv_coord_t obj_w = lv_obj_get_width(m->obj);
-        lv_coord_t obj_h = lv_obj_get_height(m->obj);
-
-        // 更新位置
-        m->pos_x += m->vel_x;
-        m->pos_y += m->vel_y;
-
-        bool hit_x = false;
-        bool hit_y = false;
-
-        // --- 水平边缘检测与随机反弹 ---
-        if (m->pos_x <= 0) {
-            m->pos_x = 0;
-            m->vel_x = get_rand_vel(true);  // 碰到左边，X速度必须变为正数（向右）
-            hit_x = true;
-        } else if (m->pos_x + obj_w >= screen_w) {
-            m->pos_x = screen_w - obj_w;
-            m->vel_x = get_rand_vel(false); // 碰到右边，X速度必须变为负数（向左）
-            hit_x = true;
-        }
-
-        // --- 垂直边缘检测与随机反弹 ---
-        if (m->pos_y <= 0) {
-            m->pos_y = 0;
-            m->vel_y = get_rand_vel(true);  // 碰到上边，Y速度必须变为正数（向下）
-            hit_y = true;
-        } else if (m->pos_y + obj_h >= screen_h) {
-            m->pos_y = screen_h - obj_h;
-            m->vel_y = get_rand_vel(false); // 碰到下边，Y速度必须变为负数（向上）
-            hit_y = true;
-        }
-
-        // --- 增加随机性：如果只碰到了一个边，把另一个方向的速度也随机改变 ---
-        if (hit_x && !hit_y) {
-            m->vel_y = get_rand_vel_any(); // 碰到左右墙壁时，上下方向随机改变
-        }
-        if (hit_y && !hit_x) {
-            m->vel_x = get_rand_vel_any(); // 碰到上下墙壁时，左右方向随机改变
-        }
-
-        // 应用新坐标
-        lv_obj_set_pos(m->obj, (lv_coord_t)m->pos_x, (lv_coord_t)m->pos_y);
-    }
-
-    // 强制全屏重绘，消除拖影
-    lv_obj_invalidate(lv_scr_act());
-}
-
-void lvgl_img_random_move_test_init(void)
-{
-    lv_rand_set_seed(esp_random());
-    ESP_LOGI(TAG, "启动图片+圆形弹跳移动测试 (修复坐标与随机反弹)");
-
-    // 设置纯黑背景
-    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0);
-    lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, 0);
-
-    // 获取屏幕尺寸
-    lv_display_t *disp = lv_display_get_default();
-    lv_coord_t screen_w = lv_display_get_horizontal_resolution(disp);
-    lv_coord_t screen_h = lv_display_get_vertical_resolution(disp);
-
-    // --- 1. 创建图片 ---
-    lv_obj_t *img = lv_image_create(lv_scr_act());
-    lv_image_set_src(img, "S:image2.png");
-    lv_obj_set_style_opa(img, LV_OPA_COVER, 0);
-    lv_obj_set_style_bg_opa(img, LV_OPA_TRANSP, 0);
-    
-    // --- 2. 创建圆形 ---
-    lv_obj_t *circle = lv_obj_create(lv_scr_act());
-    lv_obj_set_size(circle, 80, 80);
-    lv_obj_set_style_radius(circle, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_bg_color(circle, lv_color_hex(0x2196F3), 0);
-    lv_obj_set_style_border_width(circle, 0, 0);
-
-    // 强制更新布局，以便获取到图片和圆形的真实宽高
-    lv_obj_update_layout(lv_scr_act());
-
-    // --- 3. 初始化图片位置和速度 ---
-    // 【关键修复】：不使用 lv_obj_center，而是手动计算居中坐标，保持左上角对齐(LV_ALIGN_TOP_LEFT)
-    movers[0].obj = img;
-    movers[0].pos_x = (screen_w - lv_obj_get_width(img)) / 2.0f;
-    movers[0].pos_y = (screen_h - lv_obj_get_height(img)) / 2.0f;
-    lv_obj_set_pos(img, (lv_coord_t)movers[0].pos_x, (lv_coord_t)movers[0].pos_y);
-    
-    movers[0].vel_x = get_rand_vel_any();
-    movers[0].vel_y = get_rand_vel_any();
-
-    // --- 4. 初始化圆形位置和速度 ---
-    movers[1].obj = circle;
-    // 让圆形稍微偏离中心一点，避免两个物体完全重叠
-    movers[1].pos_x = (screen_w - lv_obj_get_width(circle)) / 2.0f + 50.0f;
-    movers[1].pos_y = (screen_h - lv_obj_get_height(circle)) / 2.0f - 50.0f;
-    lv_obj_set_pos(circle, (lv_coord_t)movers[1].pos_x, (lv_coord_t)movers[1].pos_y);
-
-    movers[1].vel_x = get_rand_vel_any();
-    movers[1].vel_y = get_rand_vel_any();
-
-    // 创建定时器，16ms 约等于 60FPS
-    move_timer = lv_timer_create(move_timer_cb, 16, NULL);
-    lv_timer_set_repeat_count(move_timer, LV_ANIM_REPEAT_INFINITE);
-}
-
-
-
-PATH: main/lvgl_img_random_move_test.h
-// ------------------------------------------
-// 📄 lvgl_img_random_move_test.h
-// ------------------------------------------
-// lvgl_img_random_move_test.h
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief 初始化图片随机移动测试界面
- *        image2.png 会在屏幕内连续平滑地随机移动
- */
-void lvgl_img_random_move_test_init(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
 PATH: main/main.c
 // ------------------------------------------
 // 📄 main.c
@@ -337,6 +274,7 @@ PATH: main/main.c
 #include "lvgl_img_jpeg_png_test.h"
 #include "lvgl_img_random_move_test.h" // 添加头文件
 #include "lvgl_img_rotate_test.h"
+#include "lvgl_font_size_test.h"
 
 #define TAG "main"
 
@@ -348,8 +286,9 @@ void app_main(void) {
 
   // 选择要运行的测试，只保留一个避免冲突
   // lvgl_img_jpeg_png_test_init();
-  lvgl_img_rotate_test_init();
+  // lvgl_img_rotate_test_init();
   // lvgl_img_random_move_test_init(); // 随机移动测试
+  lvgl_font_size_test_init(); // 字体缩放测试
 
   lvgl_port_unlock();
   while (1) {

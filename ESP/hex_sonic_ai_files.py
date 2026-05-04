@@ -41,8 +41,10 @@ CUSTOM_BLOCK_LIST = [
     'lvgl_img_jpeg_png_test.h',
     'lvgl_img_rotate_test.c',
     'lvgl_img_rotate_test.h',
-    # 'lvgl_img_random_move_test.c',
-    # 'lvgl_img_random_move_test.h',
+    'lvgl_img_random_move_test.c',
+    'lvgl_img_random_move_test.h',
+    # 'lvgl_font_size_test.c',
+    # 'lvgl_font_size_test.h',
 
 ]
 
