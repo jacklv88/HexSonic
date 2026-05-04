@@ -11,7 +11,8 @@ TARGET_EXTENSIONS = (
     'CMakeLists.txt',            # 构建脚本
     'sdkconfig',                 # ESP 配置 (通常没有后缀)
     'sdkconfig.defaults',
-    '.conf', '.prj', '.in'       # 其他常见配置    
+    '.conf', '.prj', '.in',       # 其他常见配置  
+    '.png','.jpg',
 )
 
 # 2. 这里填入您不想看到的文件名或目录名
@@ -33,6 +34,8 @@ CUSTOM_BLOCK_LIST = [
     'CST816D.h',
     'esp_lcd_spd2010.c',
     'esp_lcd_spd2010.h',
+    'image.jpg',
+    'image.png',
 
 ]
 
