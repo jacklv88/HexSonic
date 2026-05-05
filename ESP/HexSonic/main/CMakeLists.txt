@@ -14,6 +14,8 @@ idf_component_register(
     SRCS "main.c" 
          "driver_io.c" 
          "driver_lcd_touch.c"
+         "audio_code.c"
+         "audio_gmf_setup.c"
          ${lvgl_test_srcs}  # 引入测试界面源码
     
     PRIV_REQUIRES 
@@ -22,6 +24,7 @@ idf_component_register(
         esp_lvgl_port 
         spiffs 
         esp_lv_decoder
+        driver esp_audio_codec gmf_audio gmf_core gmf_io gmf_loader
         
     INCLUDE_DIRS 
         "." 

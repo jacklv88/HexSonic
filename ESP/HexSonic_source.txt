@@ -1,7 +1,7 @@
 ESP-IDF / C++ 代码导出
 ==================================================
-时间: 2026-05-05 15:12:59
-屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'image3.png', 'lvgl_img_jpeg_png_test.c', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h', 'lvgl_font_size_test.c', 'lvgl_font_size_test.h', 'lvgl_ahv_test.h', 'lvgl_ahv_test.c', 'lvgl_arc_list_test.h', 'lvgl_arc_list_test.c']
+时间: 2026-05-05 16:47:21
+屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'audio_code.c', 'audio_code.h', 'image.jpg', 'image.png', 'image2.png', 'image3.png', 'lvgl_img_jpeg_png_test.c', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h', 'lvgl_font_size_test.c', 'lvgl_font_size_test.h', 'lvgl_ahv_test.h', 'lvgl_ahv_test.c', 'lvgl_arc_list_test.h', 'lvgl_arc_list_test.c']
 说明: 仅导出 .c, .h, .cpp, CMakeLists.txt 等源码文件。
 
 
@@ -31,10 +31,15 @@ LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
 │   │   │   📄 esp_lcd_spd2010.h [🚫 已过滤]
 ├── 📁 main/
 │   │   📄 CMakeLists.txt
+│   │   📄 audio_code.c [🚫 已过滤]
+│   │   📄 audio_code.h [🚫 已过滤]
+│   │   📄 audio_gmf_setup.c
+│   │   📄 audio_gmf_setup.h
 │   │   📄 driver_io.c [🚫 已过滤]
 │   │   📄 driver_io.h [🚫 已过滤]
 │   │   📄 driver_lcd_touch.c [🚫 已过滤]
 │   │   📄 driver_lcd_touch.h [🚫 已过滤]
+│   │   📄 idf_component.yml
 │   │   📄 main.c
 │   ├── 📁 lvgl_test/
 │   │   │   📄 lvgl_ahv_test.c [🚫 已过滤]
@@ -50,9 +55,6 @@ LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
 │   │   │   📄 lvgl_img_rotate_test.c [🚫 已过滤]
 │   │   │   📄 lvgl_img_rotate_test.h [🚫 已过滤]
 ├── 📁 spiffs/
-│   │   📄 image.jpg [🚫 已过滤]
-│   │   📄 image2.png [🚫 已过滤]
-│   │   📄 image3.png [🚫 已过滤]
 
 ==================================================
 
@@ -104,6 +106,8 @@ idf_component_register(
     SRCS "main.c" 
          "driver_io.c" 
          "driver_lcd_touch.c"
+         "audio_code.c"
+         "audio_gmf_setup.c"
          ${lvgl_test_srcs}  # 引入测试界面源码
     
     PRIV_REQUIRES 
@@ -112,6 +116,7 @@ idf_component_register(
         esp_lvgl_port 
         spiffs 
         esp_lv_decoder
+        driver esp_audio_codec gmf_audio gmf_core gmf_io gmf_loader
         
     INCLUDE_DIRS 
         "." 
@@ -120,6 +125,358 @@ idf_component_register(
 
 # 创建 SPIFFS 分区镜像
 spiffs_create_partition_image(storage ../spiffs FLASH_IN_PROJECT)
+
+
+
+PATH: main/audio_gmf_setup.c
+// ------------------------------------------
+// 📄 audio_gmf_setup.c
+// ------------------------------------------
+// ------------------------------------------
+// 📄 main/audio_gmf_setup.c
+// ------------------------------------------
+#include "audio_gmf_setup.h"
+#include "esp_log.h"
+#include <string.h>
+
+// 硬件驱动层
+#include "audio_code.h"
+#include "driver/i2c_master.h"
+#include "driver/i2s_std.h"
+
+// ESP Codec Dev 抽象层
+#include "esp_codec_dev.h"
+#include "esp_codec_dev_defaults.h"
+
+// GMF 核心与组件层
+#include "esp_gmf_element.h"
+#include "esp_gmf_pipeline.h"
+#include "esp_gmf_pool.h"
+#include "gmf_loader_setup_defaults.h"
+#include "esp_gmf_io_codec_dev.h"
+
+// 🎛️ 硬件宏配置 (保持不变)
+#define AUDIO_I2C_NUM (1)
+#define AUDIO_I2C_SDA_IO (11)
+#define AUDIO_I2C_SCL_IO (10)
+#define AUDIO_I2C_SPEED_HZ (400000)
+
+#define AUDIO_I2S_NUM (1)
+#define AUDIO_I2S_MCLK_IO (13)
+#define AUDIO_I2S_BCLK_IO (8)
+#define AUDIO_I2S_WS_IO (7)
+#define AUDIO_I2S_DOUT_IO (9)
+#define AUDIO_I2S_DIN_IO (-1)
+
+#define AUDIO_DEFAULT_RATE (44100)
+#define AUDIO_AMP_DEFAULT_VOL (60)
+
+static const char *TAG = "AudioPlayer";
+static i2s_chan_handle_t tx_chan = NULL;
+static esp_codec_dev_handle_t playback_handle = NULL;
+
+// 🟢 播放器全局上下文管理
+typedef struct {
+    esp_gmf_pool_handle_t pool;
+    esp_gmf_pipeline_handle_t pipe;
+    esp_gmf_task_handle_t work_task;
+    audio_state_cb_t state_cb;
+    char *current_uri;
+    bool is_gapless;
+} player_ctx_t;
+
+static player_ctx_t s_player = {0};
+
+// ==========================================
+// 硬件初始化 (与之前完全相同)
+// ==========================================
+static esp_err_t audio_hardware_init(void) {
+    esp_err_t ret;
+
+    // 1.1 初始化 I2C (使用新一代 driver_ng API)
+    i2c_master_bus_config_t i2c_bus_config = {
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .i2c_port = AUDIO_I2C_NUM,
+        .scl_io_num = AUDIO_I2C_SCL_IO,
+        .sda_io_num = AUDIO_I2C_SDA_IO,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+    i2c_master_bus_handle_t bus_handle;
+    ret = i2c_new_master_bus(&i2c_bus_config, &bus_handle);
+    if (ret != ESP_OK) return ret;
+
+    // 添加 ACM86xx 设备到总线上
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = (0x68 >> 1), // ACM86xx I2C 地址
+        .scl_speed_hz = AUDIO_I2C_SPEED_HZ,
+    };
+    i2c_master_dev_handle_t audio_dev_handle;
+    ret = i2c_master_bus_add_device(bus_handle, &dev_cfg, &audio_dev_handle);
+    if (ret != ESP_OK) return ret;
+
+    // 1.2 初始化 ACM86xx 功放芯片 (将设备句柄传过去)
+    ESP_LOGI(TAG, "Init ACM86xx Codec...");
+    if (init_audio_code((void *)audio_dev_handle, AUDIO_AMP_DEFAULT_VOL) != 0) {
+        ESP_LOGE(TAG, "ACM86xx Init Failed!");
+        return ESP_FAIL;
+    }
+    set_mute_audio_code(0); // 解除静音
+
+    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(AUDIO_I2S_NUM, I2S_ROLE_MASTER);
+    ret = i2s_new_channel(&chan_cfg, &tx_chan, NULL);
+    if (ret != ESP_OK) return ret;
+
+    i2s_std_config_t std_cfg = {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(AUDIO_DEFAULT_RATE),
+        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+        .gpio_cfg = {
+            .mclk = AUDIO_I2S_MCLK_IO,
+            .bclk = AUDIO_I2S_BCLK_IO,
+            .ws = AUDIO_I2S_WS_IO,
+            .dout = AUDIO_I2S_DOUT_IO,
+            .din = AUDIO_I2S_DIN_IO,
+            .invert_flags = {.mclk_inv = false, .bclk_inv = false, .ws_inv = false},
+        },
+    };
+    ret = i2s_channel_init_std_mode(tx_chan, &std_cfg);
+    if (ret != ESP_OK) return ret;
+    i2s_channel_enable(tx_chan);
+
+    audio_codec_i2s_cfg_t i2s_codec_cfg = {
+        .port = AUDIO_I2S_NUM,
+        .rx_handle = NULL,
+        .tx_handle = tx_chan,
+    };
+    const audio_codec_data_if_t *data_if = audio_codec_new_i2s_data(&i2s_codec_cfg);
+    esp_codec_dev_cfg_t codec_dev_cfg = {
+        .dev_type = ESP_CODEC_DEV_TYPE_OUT,
+        .codec_if = NULL,
+        .data_if = data_if,
+    };
+    playback_handle = esp_codec_dev_new(&codec_dev_cfg);
+    esp_codec_dev_sample_info_t fs = {
+        .sample_rate = AUDIO_DEFAULT_RATE,
+        .channel = 2,
+        .bits_per_sample = 16,
+    };
+    esp_codec_dev_open(playback_handle, &fs);
+    return ESP_OK;
+}
+
+// ==========================================
+// 事件监听与策略回调 (实现回调和无缝播放的核心)
+// ==========================================
+static esp_gmf_err_t _pipeline_event_cb(esp_gmf_event_pkt_t *event, void *ctx) {
+    if (s_player.state_cb) {
+        audio_play_state_t state = AUDIO_STATE_NONE;
+        switch (event->sub) {
+        case ESP_GMF_EVENT_STATE_RUNNING: state = AUDIO_STATE_PLAYING; break;
+        case ESP_GMF_EVENT_STATE_PAUSED: state = AUDIO_STATE_PAUSED; break;
+        case ESP_GMF_EVENT_STATE_STOPPED: state = AUDIO_STATE_STOPPED; break;
+        case ESP_GMF_EVENT_STATE_FINISHED: state = AUDIO_STATE_FINISHED; break;
+        case ESP_GMF_EVENT_STATE_ERROR: state = AUDIO_STATE_ERROR; break;
+        default: break;
+        }
+        if (state != AUDIO_STATE_NONE) {
+            s_player.state_cb(state);
+        }
+    }
+    return ESP_GMF_ERR_OK;
+}
+
+static esp_gmf_err_t _pipeline_strategy_cb(esp_gmf_task_handle_t handle, uint8_t strategy_type, void *ctx, uint8_t *out_action) {
+    if (strategy_type == GMF_TASK_STRATEGY_TYPE_FINISH) {
+        if (s_player.is_gapless && s_player.current_uri && strncmp(s_player.current_uri, "http", 4) != 0) {
+            // 1. 保持重置动作
+            *out_action = GMF_TASK_STRATEGY_ACTION_RESET;
+            
+            // 2. 复位文件 IO 指针
+            esp_gmf_io_handle_t io = s_player.pipe->in;
+            esp_gmf_io_close(io);
+            esp_gmf_io_reset(io);
+            esp_gmf_io_set_uri(io, s_player.current_uri);
+            esp_gmf_io_open(io);
+            
+            // 3. 【核心修复】：将丢失的音频处理节点重新装载进任务队列
+            esp_gmf_pipeline_loading_jobs(s_player.pipe);
+            
+            // 4. 【核心修复】：重新唤醒流水线投入运行
+            esp_gmf_pipeline_run(s_player.pipe);
+            
+            ESP_LOGI(TAG, "Gapless Loop triggered! Pipeline jobs reloaded and running.");
+        } else {
+            *out_action = GMF_TASK_STRATEGY_ACTION_DEFAULT;
+        }
+    } else {
+        *out_action = GMF_TASK_STRATEGY_ACTION_DEFAULT;
+    }
+    return ESP_GMF_ERR_OK;
+}
+// ==========================================
+// 播放器控制接口
+// ==========================================
+esp_err_t audio_gmf_system_init(void) {
+    esp_err_t ret = audio_hardware_init();
+    if (ret != ESP_OK) return ret;
+
+    // 只初始化组件池，不在这里创建 Pipeline
+    esp_gmf_pool_init(&s_player.pool);
+    gmf_loader_setup_io_default(s_player.pool); // 包含 io_file 和 io_http
+    gmf_loader_setup_audio_codec_default(s_player.pool);
+    gmf_loader_setup_audio_effects_default(s_player.pool);
+
+    return ESP_OK;
+}
+
+void audio_player_set_callback(audio_state_cb_t cb) {
+    s_player.state_cb = cb;
+}
+
+esp_err_t audio_player_play(const char *uri, bool gapless) {
+    if (!uri) return ESP_ERR_INVALID_ARG;
+
+    // 1. 如果有正在运行的流水线，先安全销毁
+    if (s_player.pipe) {
+        esp_gmf_pipeline_stop(s_player.pipe);
+        esp_gmf_task_deinit(s_player.work_task);
+        esp_gmf_pipeline_destroy(s_player.pipe);
+        s_player.pipe = NULL;
+    }
+
+    // 2. 更新上下文
+    if (s_player.current_uri) free(s_player.current_uri);
+    s_player.current_uri = strdup(uri);
+    s_player.is_gapless = gapless;
+
+    // 3. 动态判断输入源是 http 还是 file
+    const char *in_name = (strncmp(uri, "http", 4) == 0) ? "io_http" : "io_file";
+    const char *name[] = {"aud_dec", "aud_ch_cvt", "aud_bit_cvt", "aud_rate_cvt"};
+
+    // 4. 构建新的流水线
+    esp_err_t ret = esp_gmf_pool_new_pipeline(s_player.pool, in_name, name, 4, "io_codec_dev", &s_player.pipe);
+    if (ret != ESP_OK) return ret;
+
+    // 绑定输出外设和输入 URI
+    esp_gmf_element_handle_t out_el = ESP_GMF_PIPELINE_GET_OUT_INSTANCE(s_player.pipe);
+    esp_gmf_io_codec_dev_set_dev(out_el, playback_handle);
+    esp_gmf_pipeline_set_in_uri(s_player.pipe, uri);
+
+    // 5. 绑定任务与回调
+    esp_gmf_task_cfg_t task_cfg = DEFAULT_ESP_GMF_TASK_CONFIG();
+    task_cfg.thread.stack_in_ext = false;
+    task_cfg.name = "gmf_pipe_task";
+    esp_gmf_task_init(&task_cfg, &s_player.work_task);
+
+    // 注册策略 (无缝核心) 与 事件监听
+    esp_gmf_task_set_strategy_func(s_player.work_task, _pipeline_strategy_cb, NULL);
+    esp_gmf_pipeline_set_event(s_player.pipe, _pipeline_event_cb, NULL);
+
+    esp_gmf_pipeline_bind_task(s_player.pipe, s_player.work_task);
+    esp_gmf_pipeline_loading_jobs(s_player.pipe);
+
+    ESP_LOGI(TAG, "Playing: %s (Gapless: %s)", uri, gapless ? "YES" : "NO");
+    return esp_gmf_pipeline_run(s_player.pipe);
+}
+
+esp_err_t audio_player_pause(void) {
+    if (s_player.pipe) return esp_gmf_pipeline_pause(s_player.pipe);
+    return ESP_FAIL;
+}
+
+esp_err_t audio_player_resume(void) {
+    if (s_player.pipe) return esp_gmf_pipeline_resume(s_player.pipe);
+    return ESP_FAIL;
+}
+
+esp_err_t audio_player_stop(void) {
+    if (s_player.pipe) return esp_gmf_pipeline_stop(s_player.pipe);
+    return ESP_FAIL;
+}
+
+
+
+PATH: main/audio_gmf_setup.h
+// ------------------------------------------
+// 📄 audio_gmf_setup.h
+// ------------------------------------------
+// ------------------------------------------
+// 📄 main/audio_gmf_setup.h
+// ------------------------------------------
+#ifndef AUDIO_GMF_SETUP_H
+#define AUDIO_GMF_SETUP_H
+
+#include "esp_err.h"
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// 定义播放器状态枚举
+typedef enum {
+    AUDIO_STATE_NONE = 0,
+    AUDIO_STATE_PLAYING,
+    AUDIO_STATE_PAUSED,
+    AUDIO_STATE_STOPPED,
+    AUDIO_STATE_FINISHED,
+    AUDIO_STATE_ERROR
+} audio_play_state_t;
+
+// 定义状态回调函数指针类型
+typedef void (*audio_state_cb_t)(audio_play_state_t state);
+
+/**
+ * @brief 1. 初始化整个硬件和音频底层框架
+ */
+esp_err_t audio_gmf_system_init(void);
+
+/**
+ * @brief 2. 注册播放状态监听回调
+ */
+void audio_player_set_callback(audio_state_cb_t cb);
+
+/**
+ * @brief 3. 播放指定的音乐 (支持本地路径 /sdcard/... 或 网络 http://...)
+ * @param uri 音乐路径或URL
+ * @param gapless 是否开启无缝单曲循环 (针对本地MP3)
+ */
+esp_err_t audio_player_play(const char *uri, bool gapless);
+
+/**
+ * @brief 4. 播放控制接口
+ */
+esp_err_t audio_player_pause(void);
+esp_err_t audio_player_resume(void);
+esp_err_t audio_player_stop(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // AUDIO_GMF_SETUP_H
+
+
+
+PATH: main/idf_component.yml
+// ------------------------------------------
+// 📄 idf_component.yml
+// ------------------------------------------
+## IDF Component Manager Manifest File
+dependencies:
+  ## Required IDF version
+  idf:
+    version: '>=5.1.0'
+  # 乐鑫移植层，它会自动处理与 LVGL 9 的对接
+  espressif/esp_lvgl_port: ^2.7.2
+  espressif/esp_lv_decoder: ^0.3.5
+  espressif/gmf_audio: "^0.8.1"
+  espressif/gmf_core: "^0.8.1"
+  espressif/gmf_io: "^0.8.0"      
+  espressif/gmf_loader: "^0.8.0"  
+  espressif/esp_audio_codec: "^2.4.1"
+
 
 
 
@@ -136,49 +493,91 @@ PATH: main/main.c
 #include "esp_lvgl_port.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "lvgl_img_jpeg_png_test.h"
-#include "lvgl_img_random_move_test.h" 
-#include "lvgl_img_rotate_test.h"
-#include "lvgl_font_size_test.h"
-#include "lvgl_arc_list_test.h"        // <--- 引入圆弧列表头文件
+
+// 引入我们刚才封装好的音频模块
+#include "audio_gmf_setup.h"
+
+// LVGL 界面测试头文件
 #include "lvgl_ahv_test.h"
+// #include "lvgl_img_jpeg_png_test.h"
+// #include "lvgl_img_random_move_test.h"
+// #include "lvgl_img_rotate_test.h"
+// #include "lvgl_font_size_test.h"
+// #include "lvgl_arc_list_test.h"
 
 #define TAG "main"
 
+// 定义一个回调函数来接收播放状态
+void my_audio_state_callback(audio_play_state_t state) {
+    switch (state) {
+    case AUDIO_STATE_PLAYING:
+        ESP_LOGI("APP", "🎵 Music is Playing");
+        break;
+    case AUDIO_STATE_PAUSED:
+        ESP_LOGI("APP", "⏸️ Music Paused");
+        break;
+    case AUDIO_STATE_STOPPED:
+        ESP_LOGI("APP", "⏹️ Music Stopped");
+        break;
+    case AUDIO_STATE_FINISHED:
+        ESP_LOGI("APP", "✅ Track Finished");
+        break;
+    case AUDIO_STATE_ERROR:
+        ESP_LOGE("APP", "❌ Playback Error");
+        break;
+    default:
+        break;
+    }
+}
+
 void app_main(void) {
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  driver_io_mount_spiffs();
-  driver_lcd_touch_init();
-  lvgl_port_lock(0);
-  // 注释掉之前的测试，运行新的圆弧列表
-  // lvgl_img_jpeg_png_test_init();
-  // lvgl_img_rotate_test_init();
-  // lvgl_img_random_move_test_init(); 
-  // lvgl_font_size_test_init(); 
-  // lvgl_arc_list_test_init();        
-  lvgl_ahv_test_init();
-  lvgl_port_unlock();
-  while (1) {
     vTaskDelay(pdMS_TO_TICKS(1000));
-    multi_heap_info_t info;
-    // SRAM 信息
-    heap_caps_get_info(&info, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-    uint32_t sram_total =
-        (info.total_free_bytes + info.total_allocated_bytes) / 1024;
-    uint32_t sram_free = info.total_free_bytes / 1024;
-    uint32_t sram_max = info.largest_free_block / 1024;
-    // PSRAM 信息
-    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-    uint32_t psram_total =
-        (info.total_free_bytes + info.total_allocated_bytes) / 1024;
-    uint32_t psram_free = info.total_free_bytes / 1024;
-    uint32_t psram_max = info.largest_free_block / 1024;
-    ESP_LOGI(TAG,
-             "Heap: SRAM total=%uKB free=%uKB max=%uKB | PSRAM total=%uKB "
-             "free=%uKB max=%uKB",
-             sram_total, sram_free, sram_max, psram_total, psram_free,
-             psram_max);
-  }
+
+    // 1. 基础系统与外设初始化
+    driver_io_mount_spiffs();
+    driver_lcd_touch_init();
+
+    // 3. LVGL UI 界面启动
+    lvgl_port_lock(0);
+    lvgl_ahv_test_init();
+    lvgl_port_unlock();
+
+    // 1. 初始化系统
+    audio_gmf_system_init();
+
+    // 2. 注册回调函数监听状态
+    audio_player_set_callback(my_audio_state_callback);
+
+    // 3. 测试控制指令 (可以通过 LVGL 按钮去触发这些接口)
+
+    // 场景A: 播放本地音乐并开启无缝循环
+    audio_player_play("/spiffs/1.mp3", true);
+
+    // 延时10秒后暂停
+    vTaskDelay(pdMS_TO_TICKS(10000));
+    audio_player_pause();
+
+    // 延时2秒后继续
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    audio_player_resume();
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(5000));
+        multi_heap_info_t info;
+
+        heap_caps_get_info(&info, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+        uint32_t sram_total =
+            (info.total_free_bytes + info.total_allocated_bytes) / 1024;
+        uint32_t sram_free = info.total_free_bytes / 1024;
+
+        heap_caps_get_info(&info, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        uint32_t psram_total =
+            (info.total_free_bytes + info.total_allocated_bytes) / 1024;
+        uint32_t psram_free = info.total_free_bytes / 1024;
+
+        ESP_LOGI(TAG, "Heap: SRAM %u/%u KB | PSRAM %u/%u KB", sram_free, sram_total,
+                 psram_free, psram_total);
+    }
 }
 
 

@@ -6,3 +6,8 @@ dependencies:
   # 乐鑫移植层，它会自动处理与 LVGL 9 的对接
   espressif/esp_lvgl_port: ^2.7.2
   espressif/esp_lv_decoder: ^0.3.5
+  espressif/gmf_audio: "^0.8.1"
+  espressif/gmf_core: "^0.8.1"
+  espressif/gmf_io: "^0.8.0"      
+  espressif/gmf_loader: "^0.8.0"  
+  espressif/esp_audio_codec: "^2.4.1"

@@ -12,7 +12,7 @@ TARGET_EXTENSIONS = (
     'sdkconfig',                 # ESP 配置 (通常没有后缀)
     'sdkconfig.defaults',
     '.conf', '.prj', '.in',       # 其他常见配置  
-    '.png','.jpg',
+    '.png','.jpg', '.yml',
 )
 
 # 2. 这里填入您不想看到的文件名或目录名
@@ -34,6 +34,10 @@ CUSTOM_BLOCK_LIST = [
     'CST816D.h',
     'esp_lcd_spd2010.c',
     'esp_lcd_spd2010.h',
+    'audio_code.c',
+    'audio_code.h',
+    # 'audio_gmf_setup.c',
+    # 'audio_gmf_setup.h',
     'image.jpg',
     'image.png',
     'image2.png',
