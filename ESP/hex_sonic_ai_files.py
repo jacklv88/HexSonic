@@ -37,6 +37,7 @@ CUSTOM_BLOCK_LIST = [
     'image.jpg',
     'image.png',
     'image2.png',
+    'image3.png',
     'lvgl_img_jpeg_png_test.',
     'lvgl_img_jpeg_png_test.h',
     'lvgl_img_rotate_test.c',

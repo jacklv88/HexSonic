@@ -5,56 +5,6 @@
 
 static const char *TAG = "arc_list_round";
 
-
-/* 针对 412x412 圆形屏幕优化的滑动算法 (带性能优化) */
-// static void scroll_event_cb(lv_event_t * e)
-// {
-//     lv_obj_t * cont = lv_event_get_target(e);
-    
-//     /* 圆心 Y 坐标为 412 / 2 = 206 */
-//     const int32_t screen_center_y = 206; 
-//     /* 定义视口边界，超过这个距离的 Cell 判定为不可见 (206 + 80的卡片高度 ≈ 286) */
-//     const int32_t visible_threshold = 280; 
-
-//     uint32_t child_cnt = lv_obj_get_child_cnt(cont);
-//     for(uint32_t i = 0; i < child_cnt; i++) {
-//         lv_obj_t * child = lv_obj_get_child(cont, i);
-        
-//         if(!lv_obj_has_flag(child, LV_OBJ_FLAG_SNAPPABLE)) continue; 
-
-//         /* 获取 Y 坐标 */
-//         lv_area_t child_a;
-//         lv_obj_get_coords(child, &child_a);
-//         int32_t child_y_center = child_a.y1 + lv_area_get_height(&child_a) / 2;
-//         int32_t diff_y = child_y_center - screen_center_y;
-//         int32_t abs_diff_y = abs(diff_y);
-
-//         /* 🚀 优化 1：视口剔除 (Culling) */
-//         /* 如果卡片距离中心太远（完全在屏幕外），直接隐藏并跳过抛物线计算 */
-//         if (abs_diff_y > visible_threshold) {
-//             /* 避免重复设置样式触发重绘 */
-//             if (lv_obj_get_style_opa(child, 0) != 0) {
-//                 lv_obj_set_style_opa(child, 0, 0);
-//             }
-//             continue; // 跳过后续的乘除法计算
-//         }
-
-//         /* --- 核心算法：圆弧拟合 --- */
-//         int32_t x_ofs = (diff_y * diff_y) / 500; 
-        
-//         int32_t scale = 256 - (abs_diff_y * 120 / 206);
-//         if(scale < 150) scale = 150;
-        
-//         int32_t opa = 255 - (abs_diff_y * 180 / 206);
-//         if(opa < 0) opa = 0;
-
-//         /* 🚀 优化 2：LVGL 底层虽然有状态比对，但我们直接赋值 */
-//         lv_obj_set_style_translate_x(child, x_ofs, 0);
-//         lv_obj_set_style_transform_scale(child, scale, 0);
-//         lv_obj_set_style_opa(child, opa, 0);
-//     }
-// }
-
 static void scroll_event_cb(lv_event_t * e)
 {
     lv_obj_t * cont = lv_event_get_target(e);
@@ -81,13 +31,6 @@ static void scroll_event_cb(lv_event_t * e)
         int32_t x_ofs = (diff_y * diff_y) / 400; // 稍微改小一点除数，让弧度更明显
         lv_obj_set_style_translate_x(child, x_ofs, 0);
 
-        /* * 💣 性能杀手：全部注释掉！
-         * 不要缩放，不要透明度混合！
-         */
-        // int32_t scale = ...
-        // lv_obj_set_style_transform_scale(child, scale, 0);
-        // int32_t opa = ...
-        // lv_obj_set_style_opa(child, opa, 0);
     }
 }
 

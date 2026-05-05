@@ -12,6 +12,7 @@
 #include "lvgl_img_rotate_test.h"
 #include "lvgl_font_size_test.h"
 #include "lvgl_arc_list_test.h"        // <--- 引入圆弧列表头文件
+#include "lvgl_ahv_test.h"
 
 #define TAG "main"
 
@@ -26,8 +27,8 @@ void app_main(void) {
   // lvgl_img_rotate_test_init();
   // lvgl_img_random_move_test_init(); 
   // lvgl_font_size_test_init(); 
-  
-  lvgl_arc_list_test_init();           // <--- 调用圆弧列表初始化
+  // lvgl_arc_list_test_init();        
+  lvgl_ahv_test_init();
 
   lvgl_port_unlock();
   while (1) {
