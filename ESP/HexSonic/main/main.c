@@ -45,9 +45,10 @@ void my_audio_state_callback(audio_play_state_t state) {
 }
 
 void app_main(void) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-
+    vTaskDelay(pdMS_TO_TICKS(500));
     // 1. 基础系统与外设初始化
+    driver_io_init();
+    vTaskDelay(pdMS_TO_TICKS(500));
     driver_io_mount_spiffs();
     driver_lcd_touch_init();
 
@@ -66,15 +67,7 @@ void app_main(void) {
 
     // 场景A: 播放本地音乐并开启无缝循环
     audio_player_play("/spiffs/1.mp3", true);
-
-    // 延时10秒后暂停
-    vTaskDelay(pdMS_TO_TICKS(10000));
-    audio_player_pause();
-
-    // 延时2秒后继续
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    audio_player_resume();
-
+    
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(5000));
         multi_heap_info_t info;

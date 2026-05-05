@@ -1,7 +1,7 @@
 ESP-IDF / C++ 代码导出
 ==================================================
-时间: 2026-05-05 16:47:21
-屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'audio_code.c', 'audio_code.h', 'image.jpg', 'image.png', 'image2.png', 'image3.png', 'lvgl_img_jpeg_png_test.c', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h', 'lvgl_font_size_test.c', 'lvgl_font_size_test.h', 'lvgl_ahv_test.h', 'lvgl_ahv_test.c', 'lvgl_arc_list_test.h', 'lvgl_arc_list_test.c']
+时间: 2026-05-05 18:44:16
+屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'image3.png', 'lvgl_img_jpeg_png_test.c', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h', 'lvgl_font_size_test.c', 'lvgl_font_size_test.h', 'lvgl_ahv_test.h', 'lvgl_ahv_test.c', 'lvgl_arc_list_test.h', 'lvgl_arc_list_test.c']
 说明: 仅导出 .c, .h, .cpp, CMakeLists.txt 等源码文件。
 
 
@@ -31,14 +31,14 @@ LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
 │   │   │   📄 esp_lcd_spd2010.h [🚫 已过滤]
 ├── 📁 main/
 │   │   📄 CMakeLists.txt
-│   │   📄 audio_code.c [🚫 已过滤]
-│   │   📄 audio_code.h [🚫 已过滤]
+│   │   📄 audio_code.c
+│   │   📄 audio_code.h
 │   │   📄 audio_gmf_setup.c
 │   │   📄 audio_gmf_setup.h
-│   │   📄 driver_io.c [🚫 已过滤]
-│   │   📄 driver_io.h [🚫 已过滤]
-│   │   📄 driver_lcd_touch.c [🚫 已过滤]
-│   │   📄 driver_lcd_touch.h [🚫 已过滤]
+│   │   📄 driver_io.c
+│   │   📄 driver_io.h
+│   │   📄 driver_lcd_touch.c
+│   │   📄 driver_lcd_touch.h
 │   │   📄 idf_component.yml
 │   │   📄 main.c
 │   ├── 📁 lvgl_test/
@@ -128,6 +128,926 @@ spiffs_create_partition_image(storage ../spiffs FLASH_IN_PROJECT)
 
 
 
+PATH: main/audio_code.c
+// ------------------------------------------
+// 📄 audio_code.c
+// ------------------------------------------
+#include "audio_code.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include "driver/i2c_master.h"
+#include "driver/gpio.h"
+#include <string.h>
+
+static const char *TAG = "AudioCode";
+
+// 全局 I2C 设备句柄
+static i2c_master_dev_handle_t s_audio_dev_handle = NULL;
+
+#define Audio_I2C_TIMEOUT_MS 100
+#define Audio_ADDR           (0x18 >> 1) // 芯片 I2C 地址
+
+// ==========================================
+// 1. 底层 I2C 读写封装 (新版 API)
+// ==========================================
+static esp_err_t audio_write_reg(uint8_t reg_addr, uint8_t data) {
+    if (s_audio_dev_handle == NULL) return ESP_ERR_INVALID_STATE;
+    uint8_t buf[2] = {reg_addr, data};
+    return i2c_master_transmit(s_audio_dev_handle, buf, 2, Audio_I2C_TIMEOUT_MS);
+}
+
+// ==========================================
+// 2. 寄存器配置表 (源自“能出声”的版本)
+// ==========================================
+struct REG_TAB {
+    uint8_t Address;
+    uint8_t Data;
+};
+
+// 初始化脚本
+const struct REG_TAB m_reg_tab_initialization[] = {
+    {0x00, 0x00}, {0x04, 0x00}, {0xfc, 0x86}, {0xfd, 0x22}, {0xfe, 0x25},
+    {0x00, 0x00}, {0x00, 0x00}, {0x00, 0x00}, {0x00, 0x00}, {0x00, 0x00}
+};
+
+// DSP/Mixer/EQ 核心脚本
+const struct REG_TAB m_reg_tab[] =
+    {
+        // Digital Off during DSP configuration
+        {0x00, 0x00},
+        {0x04, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        // input mixer
+        {0x00, 0x05},
+        {0xb0, 0x08},
+        {0xb1, 0x00},
+        {0xb2, 0x00},
+        {0xb3, 0x00},
+        {0xb4, 0x00},
+        {0xb5, 0x00},
+        {0xb6, 0x00},
+        {0xb7, 0x00},
+        {0xb8, 0x00},
+        {0xb9, 0x00},
+        {0xba, 0x00},
+        {0xbb, 0x00},
+        {0xbc, 0x08},
+        {0xbd, 0x00},
+        {0xbe, 0x00},
+        {0xbf, 0x00},
+        // EQ
+        // EQ1 - left; Setting: Type - Low Shelf; Fc - 120; Gain - 2.0; Q - 0.707; Bandwidth - 239
+        {0x00, 0x04},
+        {0x18, 0x08},
+        {0x19, 0x02},
+        {0x1a, 0x9f},
+        {0x1b, 0x37},
+        {0x1c, 0xf0},
+        {0x1d, 0x2b},
+        {0x1e, 0x01},
+        {0x1f, 0xa4},
+        {0x20, 0x07},
+        {0x21, 0xd2},
+        {0x22, 0xee},
+        {0x23, 0xc9},
+        {0x24, 0x0f},
+        {0x25, 0xd5},
+        {0x26, 0x0d},
+        {0x27, 0x21},
+        {0x28, 0xf8},
+        {0x29, 0x2a},
+        {0x2a, 0x80},
+        {0x2b, 0xc6},
+        // EQ2 - left; Setting: Type - All Pass; Fc - 800; Gain - -1.0; Q - 0.707; Bandwidth - 1000
+        {0x2c, 0x08},
+        {0x2d, 0x00},
+        {0x2e, 0x00},
+        {0x2f, 0x00},
+        {0x30, 0x00},
+        {0x31, 0x00},
+        {0x32, 0x00},
+        {0x33, 0x00},
+        {0x34, 0x00},
+        {0x35, 0x00},
+        {0x36, 0x00},
+        {0x37, 0x00},
+        {0x38, 0x00},
+        {0x39, 0x00},
+        {0x3a, 0x00},
+        {0x3b, 0x00},
+        {0x3c, 0x00},
+        {0x3d, 0x00},
+        {0x3e, 0x00},
+        {0x3f, 0x00},
+        // EQ3 - left; Setting: Type - Peaking; Fc - 230; Gain - -1.2; Q - 2.3; Bandwidth - 459
+        {0x40, 0x07},
+        {0x41, 0xfe},
+        {0x42, 0x07},
+        {0x43, 0x69},
+        {0x44, 0xf0},
+        {0x45, 0x20},
+        {0x46, 0x64},
+        {0x47, 0x8f},
+        {0x48, 0x07},
+        {0x49, 0xe3},
+        {0x4a, 0x6b},
+        {0x4b, 0xaf},
+        {0x4c, 0x0f},
+        {0x4d, 0xdf},
+        {0x4e, 0x9b},
+        {0x4f, 0x71},
+        {0x50, 0xf8},
+        {0x51, 0x1e},
+        {0x52, 0x8c},
+        {0x53, 0xe8},
+        // EQ4 - left; Setting: Type - High Shelf; Fc - 13000; Gain - 4.3; Q - 0.707; Bandwidth - 1000
+        {0x54, 0x0a},
+        {0x55, 0x0d},
+        {0x56, 0xee},
+        {0x57, 0x82},
+        {0x58, 0x00},
+        {0x59, 0x16},
+        {0x5a, 0xa6},
+        {0x5b, 0x71},
+        {0x5c, 0x01},
+        {0x5d, 0xb9},
+        {0x5e, 0xa6},
+        {0x5f, 0xf0},
+        {0x60, 0xfd},
+        {0x61, 0xa1},
+        {0x62, 0x08},
+        {0x63, 0xe7},
+        {0x64, 0xfe},
+        {0x65, 0x80},
+        {0x66, 0xbb},
+        {0x67, 0x37},
+        // EQ5 - left; Setting: Type - Peaking; Fc - 110; Gain - 0.0; Q - 3.0; Bandwidth - 219
+        {0x68, 0x08},
+        {0x69, 0x00},
+        {0x6a, 0x00},
+        {0x6b, 0x00},
+        {0x6c, 0xf0},
+        {0x6d, 0x0a},
+        {0x6e, 0x3a},
+        {0x6f, 0xd1},
+        {0x70, 0x07},
+        {0x71, 0xf6},
+        {0x72, 0x31},
+        {0x73, 0x9f},
+        {0x74, 0x0f},
+        {0x75, 0xf5},
+        {0x76, 0xc5},
+        {0x77, 0x2f},
+        {0x78, 0xf8},
+        {0x79, 0x09},
+        {0x7a, 0xce},
+        {0x7b, 0x61},
+        // EQ6 - left; Setting: Type - All Pass; Fc - 28; Gain - 0.0; Q - 0.707; Bandwidth - 55
+        {0x7c, 0x08},
+        {0x7d, 0x00},
+        {0x7e, 0x00},
+        {0x7f, 0x00},
+        {0x80, 0x00},
+        {0x81, 0x00},
+        {0x82, 0x00},
+        {0x83, 0x00},
+        {0x84, 0x00},
+        {0x85, 0x00},
+        {0x86, 0x00},
+        {0x87, 0x00},
+        {0x88, 0x00},
+        {0x89, 0x00},
+        {0x8a, 0x00},
+        {0x8b, 0x00},
+        {0x8c, 0x00},
+        {0x8d, 0x00},
+        {0x8e, 0x00},
+        {0x8f, 0x00},
+        // EQ7 - left; Setting: Type - Peaking; Fc - 5000; Gain - 0.8; Q - 0.707; Bandwidth - 1000
+        {0x90, 0x08},
+        {0x91, 0x3e},
+        {0x92, 0x84},
+        {0x93, 0xe2},
+        {0x94, 0xf7},
+        {0x95, 0x52},
+        {0x96, 0xa1},
+        {0x97, 0x67},
+        {0x98, 0x02},
+        {0x99, 0xb1},
+        {0x9a, 0x74},
+        {0x9b, 0xb7},
+        {0x9c, 0x08},
+        {0x9d, 0xad},
+        {0x9e, 0x5e},
+        {0x9f, 0x99},
+        {0xa0, 0xfd},
+        {0xa1, 0x10},
+        {0xa2, 0x06},
+        {0xa3, 0x66},
+        // EQ8 - left; Setting: Type - High Shelf; Fc - 1200; Gain - -2.0; Q - 0.707; Bandwidth - 1000
+        {0xa4, 0x06},
+        {0xa5, 0x6f},
+        {0xa6, 0xa8},
+        {0xa7, 0x78},
+        {0xa8, 0xf4},
+        {0xa9, 0xa2},
+        {0xaa, 0xc9},
+        {0xab, 0xc6},
+        {0xac, 0x05},
+        {0xad, 0x16},
+        {0xae, 0x45},
+        {0xaf, 0xf3},
+        {0xb0, 0x0e},
+        {0xb1, 0x53},
+        {0xb2, 0xc0},
+        {0xb3, 0x9a},
+        {0xb4, 0xf9},
+        {0xb5, 0x83},
+        {0xb6, 0x87},
+        {0xb7, 0x35},
+        // EQ9 - left; Setting: Type - Peaking; Fc - 8600; Gain - 1.0; Q - 1.707; Bandwidth - 1000
+        {0xb8, 0x08},
+        {0xb9, 0x3d},
+        {0xba, 0xf7},
+        {0xbb, 0x9a},
+        {0xbc, 0xfa},
+        {0xbd, 0xd1},
+        {0xbe, 0xe5},
+        {0xbf, 0xc4},
+        {0xc0, 0x03},
+        {0xc1, 0xca},
+        {0xc2, 0x54},
+        {0xc3, 0xb1},
+        {0xc4, 0x05},
+        {0xc5, 0x2e},
+        {0xc6, 0x1a},
+        {0xc7, 0x3c},
+        {0xc8, 0xfb},
+        {0xc9, 0xf7},
+        {0xca, 0xb3},
+        {0xcb, 0xb5},
+        // EQ10 - left; Setting: Type - All Pass; Fc - 1000; Gain - 0.0; Q - 0.707; Bandwidth - 1000
+        {0xcc, 0x08},
+        {0xcd, 0x00},
+        {0xce, 0x00},
+        {0xcf, 0x00},
+        {0xd0, 0x00},
+        {0xd1, 0x00},
+        {0xd2, 0x00},
+        {0xd3, 0x00},
+        {0xd4, 0x00},
+        {0xd5, 0x00},
+        {0xd6, 0x00},
+        {0xd7, 0x00},
+        {0xd8, 0x00},
+        {0xd9, 0x00},
+        {0xda, 0x00},
+        {0xdb, 0x00},
+        {0xdc, 0x00},
+        {0xdd, 0x00},
+        {0xde, 0x00},
+        {0xdf, 0x00},
+        // EQ1 - right; Setting: Type - Low Shelf; Fc - 120; Gain - 2.0; Q - 0.707; Bandwidth - 239
+        {0xe0, 0x08},
+        {0xe1, 0x02},
+        {0xe2, 0x9f},
+        {0xe3, 0x37},
+        {0xe4, 0xf0},
+        {0xe5, 0x2b},
+        {0xe6, 0x01},
+        {0xe7, 0xa4},
+        {0xe8, 0x07},
+        {0xe9, 0xd2},
+        {0xea, 0xee},
+        {0xeb, 0xc9},
+        {0xec, 0x0f},
+        {0xed, 0xd5},
+        {0xee, 0x0d},
+        {0xef, 0x21},
+        {0xf0, 0xf8},
+        {0xf1, 0x2a},
+        {0xf2, 0x80},
+        {0xf3, 0xc6},
+        // EQ2 - right; Setting: Type - All Pass; Fc - 800; Gain - -1.0; Q - 0.707; Bandwidth - 1000
+        {0xf4, 0x08},
+        {0xf5, 0x00},
+        {0xf6, 0x00},
+        {0xf7, 0x00},
+        {0xf8, 0x00},
+        {0xf9, 0x00},
+        {0xfa, 0x00},
+        {0xfb, 0x00},
+        {0xfc, 0x00},
+        {0xfd, 0x00},
+        {0xfe, 0x00},
+        {0xff, 0x00},
+        {0x00, 0x05},
+        {0x04, 0x00},
+        {0x05, 0x00},
+        {0x06, 0x00},
+        {0x07, 0x00},
+        {0x08, 0x00},
+        {0x09, 0x00},
+        {0x0a, 0x00},
+        {0x0b, 0x00},
+        // EQ3 - right; Setting: Type - Peaking; Fc - 230; Gain - -1.2; Q - 2.3; Bandwidth - 459
+        {0x0c, 0x07},
+        {0x0d, 0xfe},
+        {0x0e, 0x07},
+        {0x0f, 0x69},
+        {0x10, 0xf0},
+        {0x11, 0x20},
+        {0x12, 0x64},
+        {0x13, 0x8f},
+        {0x14, 0x07},
+        {0x15, 0xe3},
+        {0x16, 0x6b},
+        {0x17, 0xaf},
+        {0x18, 0x0f},
+        {0x19, 0xdf},
+        {0x1a, 0x9b},
+        {0x1b, 0x71},
+        {0x1c, 0xf8},
+        {0x1d, 0x1e},
+        {0x1e, 0x8c},
+        {0x1f, 0xe8},
+        // EQ4 - right; Setting: Type - High Shelf; Fc - 13000; Gain - 4.3; Q - 0.707; Bandwidth - 1000
+        {0x20, 0x0a},
+        {0x21, 0x0d},
+        {0x22, 0xee},
+        {0x23, 0x82},
+        {0x24, 0x00},
+        {0x25, 0x16},
+        {0x26, 0xa6},
+        {0x27, 0x71},
+        {0x28, 0x01},
+        {0x29, 0xb9},
+        {0x2a, 0xa6},
+        {0x2b, 0xf0},
+        {0x2c, 0xfd},
+        {0x2d, 0xa1},
+        {0x2e, 0x08},
+        {0x2f, 0xe7},
+        {0x30, 0xfe},
+        {0x31, 0x80},
+        {0x32, 0xbb},
+        {0x33, 0x37},
+        // EQ5 - right; Setting: Type - Peaking; Fc - 110; Gain - 0.0; Q - 3.0; Bandwidth - 219
+        {0x34, 0x08},
+        {0x35, 0x00},
+        {0x36, 0x00},
+        {0x37, 0x00},
+        {0x38, 0xf0},
+        {0x39, 0x0a},
+        {0x3a, 0x3a},
+        {0x3b, 0xd1},
+        {0x3c, 0x07},
+        {0x3d, 0xf6},
+        {0x3e, 0x31},
+        {0x3f, 0x9f},
+        {0x40, 0x0f},
+        {0x41, 0xf5},
+        {0x42, 0xc5},
+        {0x43, 0x2f},
+        {0x44, 0xf8},
+        {0x45, 0x09},
+        {0x46, 0xce},
+        {0x47, 0x61},
+        // EQ6 - right; Setting: Type - All Pass; Fc - 28; Gain - 0.0; Q - 0.707; Bandwidth - 55
+        {0x48, 0x08},
+        {0x49, 0x00},
+        {0x4a, 0x00},
+        {0x4b, 0x00},
+        {0x4c, 0x00},
+        {0x4d, 0x00},
+        {0x4e, 0x00},
+        {0x4f, 0x00},
+        {0x50, 0x00},
+        {0x51, 0x00},
+        {0x52, 0x00},
+        {0x53, 0x00},
+        {0x54, 0x00},
+        {0x55, 0x00},
+        {0x56, 0x00},
+        {0x57, 0x00},
+        {0x58, 0x00},
+        {0x59, 0x00},
+        {0x5a, 0x00},
+        {0x5b, 0x00},
+        // EQ7 - right; Setting: Type - Peaking; Fc - 5000; Gain - 0.8; Q - 0.707; Bandwidth - 1000
+        {0x5c, 0x08},
+        {0x5d, 0x3e},
+        {0x5e, 0x84},
+        {0x5f, 0xe2},
+        {0x60, 0xf7},
+        {0x61, 0x52},
+        {0x62, 0xa1},
+        {0x63, 0x67},
+        {0x64, 0x02},
+        {0x65, 0xb1},
+        {0x66, 0x74},
+        {0x67, 0xb7},
+        {0x68, 0x08},
+        {0x69, 0xad},
+        {0x6a, 0x5e},
+        {0x6b, 0x99},
+        {0x6c, 0xfd},
+        {0x6d, 0x10},
+        {0x6e, 0x06},
+        {0x6f, 0x66},
+        // EQ8 - right; Setting: Type - High Shelf; Fc - 1200; Gain - -2.0; Q - 0.707; Bandwidth - 1000
+        {0x70, 0x06},
+        {0x71, 0x6f},
+        {0x72, 0xa8},
+        {0x73, 0x78},
+        {0x74, 0xf4},
+        {0x75, 0xa2},
+        {0x76, 0xc9},
+        {0x77, 0xc6},
+        {0x78, 0x05},
+        {0x79, 0x16},
+        {0x7a, 0x45},
+        {0x7b, 0xf3},
+        {0x7c, 0x0e},
+        {0x7d, 0x53},
+        {0x7e, 0xc0},
+        {0x7f, 0x9a},
+        {0x80, 0xf9},
+        {0x81, 0x83},
+        {0x82, 0x87},
+        {0x83, 0x35},
+        // EQ9 - right; Setting: Type - Peaking; Fc - 8600; Gain - 1.0; Q - 1.707; Bandwidth - 1000
+        {0x84, 0x08},
+        {0x85, 0x3d},
+        {0x86, 0xf7},
+        {0x87, 0x9a},
+        {0x88, 0xfa},
+        {0x89, 0xd1},
+        {0x8a, 0xe5},
+        {0x8b, 0xc4},
+        {0x8c, 0x03},
+        {0x8d, 0xca},
+        {0x8e, 0x54},
+        {0x8f, 0xb1},
+        {0x90, 0x05},
+        {0x91, 0x2e},
+        {0x92, 0x1a},
+        {0x93, 0x3c},
+        {0x94, 0xfb},
+        {0x95, 0xf7},
+        {0x96, 0xb3},
+        {0x97, 0xb5},
+        // EQ10 - right; Setting: Type - All Pass; Fc - 1000; Gain - 0.0; Q - 0.707; Bandwidth - 1000
+        {0x98, 0x08},
+        {0x99, 0x00},
+        {0x9a, 0x00},
+        {0x9b, 0x00},
+        {0x9c, 0x00},
+        {0x9d, 0x00},
+        {0x9e, 0x00},
+        {0x9f, 0x00},
+        {0xa0, 0x00},
+        {0xa1, 0x00},
+        {0xa2, 0x00},
+        {0xa3, 0x00},
+        {0xa4, 0x00},
+        {0xa5, 0x00},
+        {0xa6, 0x00},
+        {0xa7, 0x00},
+        {0xa8, 0x00},
+        {0xa9, 0x00},
+        {0xaa, 0x00},
+        {0xab, 0x00},
+        // Pre volume
+        {0xc0, 0x03},
+        {0xc1, 0x2f},
+        {0xc2, 0x52},
+        {0xc3, 0xd0},
+        {0xc4, 0x03},
+        {0xc5, 0x2f},
+        {0xc6, 0x52},
+        {0xc7, 0xd0},
+        {0xc8, 0x00},
+        {0xc9, 0xe2},
+        {0xca, 0xc4},
+        {0xcb, 0x6b},
+        // DRB
+        {0x00, 0x06},
+        {0x38, 0x08},
+        {0x39, 0x00},
+        {0x3a, 0x00},
+        {0x3b, 0x00},
+        {0x3c, 0x00},
+        {0x3d, 0x00},
+        {0x3e, 0x00},
+        {0x3f, 0x00},
+        {0x40, 0x00},
+        {0x41, 0x00},
+        {0x42, 0x00},
+        {0x43, 0x00},
+        {0x44, 0x00},
+        {0x45, 0x00},
+        {0x46, 0x00},
+        {0x47, 0x00},
+        {0x48, 0x00},
+        {0x49, 0x00},
+        {0x4a, 0x00},
+        {0x4b, 0x00},
+        {0xb0, 0x08},
+        {0xb1, 0x00},
+        {0xb2, 0x00},
+        {0xb3, 0x00},
+        {0xb4, 0x00},
+        {0xb5, 0x00},
+        {0xb6, 0x00},
+        {0xb7, 0x00},
+        {0xb8, 0x00},
+        {0xb9, 0x00},
+        {0xba, 0x00},
+        {0xbb, 0x00},
+        {0xbc, 0x00},
+        {0xbd, 0x00},
+        {0xbe, 0x00},
+        {0xbf, 0x00},
+        {0xc0, 0x00},
+        {0xc1, 0x00},
+        {0xc2, 0x00},
+        {0xc3, 0x00},
+        {0x4c, 0x08},
+        {0x4d, 0x00},
+        {0x4e, 0x00},
+        {0x4f, 0x00},
+        {0x50, 0x00},
+        {0x51, 0x00},
+        {0x52, 0x00},
+        {0x53, 0x00},
+        {0x54, 0x00},
+        {0x55, 0x00},
+        {0x56, 0x00},
+        {0x57, 0x00},
+        {0x58, 0x00},
+        {0x59, 0x00},
+        {0x5a, 0x00},
+        {0x5b, 0x00},
+        {0x5c, 0x00},
+        {0x5d, 0x00},
+        {0x5e, 0x00},
+        {0x5f, 0x00},
+        {0xc4, 0x08},
+        {0xc5, 0x00},
+        {0xc6, 0x00},
+        {0xc7, 0x00},
+        {0xc8, 0x00},
+        {0xc9, 0x00},
+        {0xca, 0x00},
+        {0xcb, 0x00},
+        {0xcc, 0x00},
+        {0xcd, 0x00},
+        {0xce, 0x00},
+        {0xcf, 0x00},
+        {0xd0, 0x00},
+        {0xd1, 0x00},
+        {0xd2, 0x00},
+        {0xd3, 0x00},
+        {0xd4, 0x00},
+        {0xd5, 0x00},
+        {0xd6, 0x00},
+        {0xd7, 0x00},
+        {0x10, 0x08},
+        {0x11, 0x00},
+        {0x12, 0x00},
+        {0x13, 0x00},
+        {0x14, 0x00},
+        {0x15, 0x00},
+        {0x16, 0x00},
+        {0x17, 0x00},
+        {0x18, 0x00},
+        {0x19, 0x00},
+        {0x1a, 0x00},
+        {0x1b, 0x00},
+        {0x1c, 0x00},
+        {0x1d, 0x00},
+        {0x1e, 0x00},
+        {0x1f, 0x00},
+        {0x20, 0x00},
+        {0x21, 0x00},
+        {0x22, 0x00},
+        {0x23, 0x00},
+        {0x88, 0x08},
+        {0x89, 0x00},
+        {0x8a, 0x00},
+        {0x8b, 0x00},
+        {0x8c, 0x00},
+        {0x8d, 0x00},
+        {0x8e, 0x00},
+        {0x8f, 0x00},
+        {0x90, 0x00},
+        {0x91, 0x00},
+        {0x92, 0x00},
+        {0x93, 0x00},
+        {0x94, 0x00},
+        {0x95, 0x00},
+        {0x96, 0x00},
+        {0x97, 0x00},
+        {0x98, 0x00},
+        {0x99, 0x00},
+        {0x9a, 0x00},
+        {0x9b, 0x00},
+        {0x24, 0x08},
+        {0x25, 0x00},
+        {0x26, 0x00},
+        {0x27, 0x00},
+        {0x28, 0x00},
+        {0x29, 0x00},
+        {0x2a, 0x00},
+        {0x2b, 0x00},
+        {0x2c, 0x00},
+        {0x2d, 0x00},
+        {0x2e, 0x00},
+        {0x2f, 0x00},
+        {0x30, 0x00},
+        {0x31, 0x00},
+        {0x32, 0x00},
+        {0x33, 0x00},
+        {0x34, 0x00},
+        {0x35, 0x00},
+        {0x36, 0x00},
+        {0x37, 0x00},
+        {0x9c, 0x08},
+        {0x9d, 0x00},
+        {0x9e, 0x00},
+        {0x9f, 0x00},
+        {0xa0, 0x00},
+        {0xa1, 0x00},
+        {0xa2, 0x00},
+        {0xa3, 0x00},
+        {0xa4, 0x00},
+        {0xa5, 0x00},
+        {0xa6, 0x00},
+        {0xa7, 0x00},
+        {0xa8, 0x00},
+        {0xa9, 0x00},
+        {0xaa, 0x00},
+        {0xab, 0x00},
+        {0xac, 0x00},
+        {0xad, 0x00},
+        {0xae, 0x00},
+        {0xaf, 0x00},
+        {0x00, 0x05},
+        {0xe4, 0x08},
+        {0xe5, 0x00},
+        {0xe6, 0x00},
+        {0xe7, 0x00},
+        {0xe8, 0x00},
+        {0xe9, 0x00},
+        {0xea, 0x00},
+        {0xeb, 0x00},
+        {0xec, 0x00},
+        {0xed, 0x00},
+        {0xee, 0x00},
+        {0xef, 0x00},
+        {0xf0, 0x00},
+        {0xf1, 0x00},
+        {0xf2, 0x00},
+        {0xf3, 0x00},
+        {0xf4, 0x00},
+        {0xf5, 0x00},
+        {0xf6, 0x00},
+        {0xf7, 0x00},
+        {0x00, 0x06},
+        {0x60, 0x08},
+        {0x61, 0x00},
+        {0x62, 0x00},
+        {0x63, 0x00},
+        {0x64, 0x00},
+        {0x65, 0x00},
+        {0x66, 0x00},
+        {0x67, 0x00},
+        {0x68, 0x00},
+        {0x69, 0x00},
+        {0x6a, 0x00},
+        {0x6b, 0x00},
+        {0x6c, 0x00},
+        {0x6d, 0x00},
+        {0x6e, 0x00},
+        {0x6f, 0x00},
+        {0x70, 0x00},
+        {0x71, 0x00},
+        {0x72, 0x00},
+        {0x73, 0x00},
+        {0x00, 0x05},
+        {0xf8, 0x08},
+        {0xf9, 0x00},
+        {0xfa, 0x00},
+        {0xfb, 0x00},
+        {0xfc, 0x00},
+        {0xfd, 0x00},
+        {0xfe, 0x00},
+        {0xff, 0x00},
+        {0x00, 0x06},
+        {0x04, 0x00},
+        {0x05, 0x00},
+        {0x06, 0x00},
+        {0x07, 0x00},
+        {0x08, 0x00},
+        {0x09, 0x00},
+        {0x0a, 0x00},
+        {0x0b, 0x00},
+        {0x0c, 0x00},
+        {0x0d, 0x00},
+        {0x0e, 0x00},
+        {0x0f, 0x00},
+        {0x74, 0x08},
+        {0x75, 0x00},
+        {0x76, 0x00},
+        {0x77, 0x00},
+        {0x78, 0x00},
+        {0x79, 0x00},
+        {0x7a, 0x00},
+        {0x7b, 0x00},
+        {0x7c, 0x00},
+        {0x7d, 0x00},
+        {0x7e, 0x00},
+        {0x7f, 0x00},
+        {0x80, 0x00},
+        {0x81, 0x00},
+        {0x82, 0x00},
+        {0x83, 0x00},
+        {0x84, 0x00},
+        {0x85, 0x00},
+        {0x86, 0x00},
+        {0x87, 0x00},
+        {0xd8, 0x00},
+        {0xd9, 0x22},
+        {0xda, 0x1d},
+        {0xdb, 0x95},
+        {0xdc, 0x04},
+        {0xdd, 0x0c},
+        {0xde, 0x37},
+        {0xdf, 0x14},
+        {0xe0, 0x1c},
+        {0xe1, 0x1b},
+        {0xe2, 0xf0},
+        {0xe3, 0x41},
+        {0xe4, 0x00},
+        {0xe5, 0x22},
+        {0xe6, 0x1d},
+        {0xe7, 0x95},
+        // AGL
+        {0x00, 0x04},
+        {0x04, 0x01},
+        {0x05, 0x80},
+        {0x06, 0x10},
+        {0x07, 0xad},
+        {0x0c, 0x00},
+        {0x0d, 0x01},
+        {0x0e, 0x5d},
+        {0x0f, 0x86},
+        {0x08, 0x00},
+        {0x09, 0x46},
+        {0x0a, 0xff},
+        {0x0b, 0x51},
+        {0x10, 0x05},
+        {0x11, 0x39},
+        {0x12, 0x47},
+        {0x13, 0xa6},
+        {0x14, 0x7a},
+        {0x15, 0xc6},
+        {0x16, 0xb8},
+        {0x17, 0x5a},
+        // ClassD Control Registers
+        {0x00, 0x00},
+        {0x04, 0x00},
+        {0x00, 0x01},
+        {0x01, 0x00},
+        {0x00, 0x00},
+        {0x11, 0xc3},
+        {0x02, 0x00},
+        {0x03, 0x05},
+        {0x01, 0x84},
+        {0x00, 0x00},
+        {0x04, 0x02},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x00, 0x00},
+        {0x04, 0x03},
+
+};
+
+// 音量映射表
+const int my_acm8615VolTable[] = {
+    0x032f52d0, 0x02d6a867, 0x0287a26c, 0x0241346f, 0x02026f31, 0x01ca7d76, 0x0198a135,
+    0x016c310e, 0x0144960c, 0x012149a6, 0x0101d3f3, 0x00f367bf, 0x00e5ca15, 0x00d8ef67,
+    0x00cccccd, 0x00c157fb, 0x00b68738, 0x00ac5156, 0x00a2adad, 0x0099940e, 0x0090fcbf,
+    0x00813856, 0x00732ae2, 0x0066a4a5, 0x005b7b16, 0x00518848, 0x0048aa71, 0x0040c371,
+    0x0039b872, 0x00337185, 0x002dd959, 0x0028dcec, 0x00246b4e, 0x00207568, 0x001cedc4,
+    0x0019c865, 0x0016fa9c, 0x00147ae1, 0x001240b9, 0x00104491, 0x000e7fad, 0x000cec09,
+    0x000b844a, 0x000a43aa, 0x000925e9, 0x0008273a, 0x0007443e, 0x000679f2, 0x000495bc, 0x00020c4a
+};
+
+// ==========================================
+// 3. 核心控制功能
+// ==========================================
+
+void set_mute_audio_code(char status) {
+    audio_write_reg(0x00, 0x00);
+    if (status) {
+        audio_write_reg(0x04, 0x0e); // Mute
+        ESP_LOGI(TAG, "Audio Muted");
+    } else {
+        audio_write_reg(0x04, 0x03); // Unmute
+        ESP_LOGI(TAG, "Audio Unmuted");
+    }
+}
+
+void set_volume_audio_code(int vol, char delay) {
+    if (vol > 100) vol = 100;
+    
+    unsigned int tmp = 0;
+    int index = vol / 2;
+    
+    // 计算音量值
+    if (vol % 2 == 0) {
+        if (index > 0) index -= 1;
+        tmp = my_acm8615VolTable[49 - index];
+    } else {
+        int index1 = (index + 1 >= 49) ? 49 : index + 1;
+        tmp = (my_acm8615VolTable[49 - index] + my_acm8615VolTable[49 - index1]) / 2;
+    }
+
+    uint8_t v[4];
+    v[0] = (tmp >> 24) & 0xff;
+    v[1] = (tmp >> 16) & 0xff;
+    v[2] = (tmp >> 8) & 0xff;
+    v[3] = (tmp) & 0xff;
+
+    // 写入 Page 5 的音量寄存器 (0xc0-0xc7)
+    audio_write_reg(0x00, 0x05);
+    audio_write_reg(0xc0, v[0]); audio_write_reg(0xc1, v[1]);
+    audio_write_reg(0xc2, v[2]); audio_write_reg(0xc3, v[3]);
+    audio_write_reg(0xc4, v[0]); audio_write_reg(0xc5, v[1]);
+    audio_write_reg(0xc6, v[2]); audio_write_reg(0xc7, v[3]);
+
+    if (delay) vTaskDelay(pdMS_TO_TICKS(10));
+}
+
+// ==========================================
+// 4. 初始化入口
+// ==========================================
+char init_audio_code(void *i2c_dev_handle, unsigned char vol) {
+    s_audio_dev_handle = (i2c_master_dev_handle_t)i2c_dev_handle;
+
+    ESP_LOGI(TAG, "Starting ACM86xx Init...");
+
+    // 1. 发送初始化脚本
+    for (int i = 0; i < sizeof(m_reg_tab_initialization)/sizeof(struct REG_TAB); i++) {
+        audio_write_reg(m_reg_tab_initialization[i].Address, m_reg_tab_initialization[i].Data);
+    }
+    
+    vTaskDelay(pdMS_TO_TICKS(30)); // DSP 等待时间
+
+    // 2. 发送主配置脚本
+    for (int i = 0; i < sizeof(m_reg_tab)/sizeof(struct REG_TAB); i++) {
+        audio_write_reg(m_reg_tab[i].Address, m_reg_tab[i].Data);
+    }
+
+    // 3. 设置初始音量并开音
+    set_volume_audio_code(vol, 1);
+    set_mute_audio_code(0);
+
+    ESP_LOGI(TAG, "ACM86xx Init Finished.");
+    return 0;
+}
+
+
+
+PATH: main/audio_code.h
+// ------------------------------------------
+// 📄 audio_code.h
+// ------------------------------------------
+#ifndef _AUDIO_CODE_
+#define _AUDIO_CODE_
+
+// 将 int i2c_num 替换为 void * 句柄
+char init_audio_code(void *i2c_dev_handle, unsigned char vol);
+void set_volume_audio_code(int val, char delay);
+void set_mute_audio_code(char status);
+
+#endif
+
+
+
 PATH: main/audio_gmf_setup.c
 // ------------------------------------------
 // 📄 audio_gmf_setup.c
@@ -155,27 +1075,33 @@ PATH: main/audio_gmf_setup.c
 #include "gmf_loader_setup_defaults.h"
 #include "esp_gmf_io_codec_dev.h"
 
-// 🎛️ 硬件宏配置 (保持不变)
-#define AUDIO_I2C_NUM (1)
-#define AUDIO_I2C_SDA_IO (11)
-#define AUDIO_I2C_SCL_IO (10)
-#define AUDIO_I2C_SPEED_HZ (400000)
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
-#define AUDIO_I2S_NUM (1)
-#define AUDIO_I2S_MCLK_IO (13)
-#define AUDIO_I2S_BCLK_IO (8)
-#define AUDIO_I2S_WS_IO (7)
-#define AUDIO_I2S_DOUT_IO (9)
-#define AUDIO_I2S_DIN_IO (-1)
+// ==========================================
+// 🎛️ 硬件引脚与参数宏定义 (集中配置区)
+// ==========================================
+// --- 更新后的音频硬件配置 ---
+#define AUDIO_I2C_NUM           (1)         
+#define AUDIO_I2C_SDA_IO        (33)        
+#define AUDIO_I2C_SCL_IO        (47)        
+#define AUDIO_I2C_SPEED_HZ      (400000)    
 
-#define AUDIO_DEFAULT_RATE (44100)
-#define AUDIO_AMP_DEFAULT_VOL (60)
+#define AUDIO_I2S_NUM           (1)         
+#define AUDIO_I2S_BCLK_IO       (35)         
+#define AUDIO_I2S_WS_IO         (36)         
+#define AUDIO_I2S_DOUT_IO       (34)         
+#define AUDIO_I2S_DIN_IO        (-1)
+
+#define BOARD_AUDIO_PA_ENABLE   (21)      
+
+#define AUDIO_DEFAULT_RATE      (44100)     
+#define AUDIO_AMP_DEFAULT_VOL   (30)        
 
 static const char *TAG = "AudioPlayer";
 static i2s_chan_handle_t tx_chan = NULL;
 static esp_codec_dev_handle_t playback_handle = NULL;
 
-// 🟢 播放器全局上下文管理
 typedef struct {
     esp_gmf_pool_handle_t pool;
     esp_gmf_pipeline_handle_t pipe;
@@ -188,12 +1114,12 @@ typedef struct {
 static player_ctx_t s_player = {0};
 
 // ==========================================
-// 硬件初始化 (与之前完全相同)
+// 1. 硬件初始化 (I2C, ACM86xx, I2S)
 // ==========================================
 static esp_err_t audio_hardware_init(void) {
     esp_err_t ret;
 
-    // 1.1 初始化 I2C (使用新一代 driver_ng API)
+    // 1.1 初始化 I2C
     i2c_master_bus_config_t i2c_bus_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .i2c_port = AUDIO_I2C_NUM,
@@ -206,56 +1132,65 @@ static esp_err_t audio_hardware_init(void) {
     ret = i2c_new_master_bus(&i2c_bus_config, &bus_handle);
     if (ret != ESP_OK) return ret;
 
-    // 添加 ACM86xx 设备到总线上
     i2c_device_config_t dev_cfg = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-        .device_address = (0x68 >> 1), // ACM86xx I2C 地址
+        .device_address = (0x18 >> 1), 
         .scl_speed_hz = AUDIO_I2C_SPEED_HZ,
     };
     i2c_master_dev_handle_t audio_dev_handle;
     ret = i2c_master_bus_add_device(bus_handle, &dev_cfg, &audio_dev_handle);
     if (ret != ESP_OK) return ret;
 
-    // 1.2 初始化 ACM86xx 功放芯片 (将设备句柄传过去)
+    // 1.2 初始化 ACM86xx 功放芯片
     ESP_LOGI(TAG, "Init ACM86xx Codec...");
     if (init_audio_code((void *)audio_dev_handle, AUDIO_AMP_DEFAULT_VOL) != 0) {
         ESP_LOGE(TAG, "ACM86xx Init Failed!");
         return ESP_FAIL;
-    }
-    set_mute_audio_code(0); // 解除静音
+    } 
+    set_mute_audio_code(0); 
 
-    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(AUDIO_I2S_NUM, I2S_ROLE_MASTER);
+    // 1.3 初始化 I2S 
+    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(AUDIO_I2S_NUM, I2S_ROLE_MASTER); 
+    chan_cfg.auto_clear = true; // 🌟 修复点 1：开启 DMA 自动清理
     ret = i2s_new_channel(&chan_cfg, &tx_chan, NULL);
     if (ret != ESP_OK) return ret;
 
     i2s_std_config_t std_cfg = {
-        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(AUDIO_DEFAULT_RATE),
-        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+        .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(AUDIO_DEFAULT_RATE), 
+        // 🌟 修复点 2：改用标准的飞利浦 I2S 协议 (PHILIPS_SLOT)
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
         .gpio_cfg = {
-            .mclk = AUDIO_I2S_MCLK_IO,
-            .bclk = AUDIO_I2S_BCLK_IO,
-            .ws = AUDIO_I2S_WS_IO,
-            .dout = AUDIO_I2S_DOUT_IO,
-            .din = AUDIO_I2S_DIN_IO,
+            // 🌟 修复点 3：强制不输出 MCLK (因为能响的代码里硬编码了 -1)
+            .mclk = -1, 
+            .bclk = AUDIO_I2S_BCLK_IO,  
+            .ws   = AUDIO_I2S_WS_IO,  
+            .dout = AUDIO_I2S_DOUT_IO,  
+            .din  = AUDIO_I2S_DIN_IO, 
             .invert_flags = {.mclk_inv = false, .bclk_inv = false, .ws_inv = false},
         },
     };
+    // 🌟 修复点 4：强制将 MCLK 倍数设为 384
+    std_cfg.clk_cfg.mclk_multiple = 384;
+
     ret = i2s_channel_init_std_mode(tx_chan, &std_cfg);
     if (ret != ESP_OK) return ret;
     i2s_channel_enable(tx_chan);
 
+    // 1.4 I2S 包装为 Codec Dev
     audio_codec_i2s_cfg_t i2s_codec_cfg = {
-        .port = AUDIO_I2S_NUM,
-        .rx_handle = NULL,
-        .tx_handle = tx_chan,
+        .port = AUDIO_I2S_NUM,  
+        .rx_handle = NULL,      
+        .tx_handle = tx_chan,   
     };
     const audio_codec_data_if_t *data_if = audio_codec_new_i2s_data(&i2s_codec_cfg);
+    
     esp_codec_dev_cfg_t codec_dev_cfg = {
         .dev_type = ESP_CODEC_DEV_TYPE_OUT,
-        .codec_if = NULL,
-        .data_if = data_if,
+        .codec_if = NULL,       
+        .data_if = data_if,     
     };
     playback_handle = esp_codec_dev_new(&codec_dev_cfg);
+    
     esp_codec_dev_sample_info_t fs = {
         .sample_rate = AUDIO_DEFAULT_RATE,
         .channel = 2,
@@ -266,64 +1201,57 @@ static esp_err_t audio_hardware_init(void) {
 }
 
 // ==========================================
-// 事件监听与策略回调 (实现回调和无缝播放的核心)
+// 2. 异步重启任务 (解决死锁与超时问题)
+// ==========================================
+static void gapless_restart_task(void *arg) {
+    ESP_LOGI(TAG, "Gapless Loop triggered! Reloading pipeline asynchronously...");
+    
+    esp_gmf_pipeline_reset(s_player.pipe);
+    esp_gmf_io_set_uri(s_player.pipe->in, s_player.current_uri);
+    esp_gmf_pipeline_loading_jobs(s_player.pipe);
+    esp_gmf_pipeline_run(s_player.pipe);
+    
+    vTaskDelete(NULL); 
+}
+
+// ==========================================
+// 3. 事件监听回调
 // ==========================================
 static esp_gmf_err_t _pipeline_event_cb(esp_gmf_event_pkt_t *event, void *ctx) {
-    if (s_player.state_cb) {
-        audio_play_state_t state = AUDIO_STATE_NONE;
-        switch (event->sub) {
-        case ESP_GMF_EVENT_STATE_RUNNING: state = AUDIO_STATE_PLAYING; break;
-        case ESP_GMF_EVENT_STATE_PAUSED: state = AUDIO_STATE_PAUSED; break;
-        case ESP_GMF_EVENT_STATE_STOPPED: state = AUDIO_STATE_STOPPED; break;
-        case ESP_GMF_EVENT_STATE_FINISHED: state = AUDIO_STATE_FINISHED; break;
-        case ESP_GMF_EVENT_STATE_ERROR: state = AUDIO_STATE_ERROR; break;
+    if (!s_player.state_cb) return ESP_GMF_ERR_OK;
+
+    audio_play_state_t state = AUDIO_STATE_NONE;
+    switch (event->sub) {
+        case ESP_GMF_EVENT_STATE_RUNNING:  state = AUDIO_STATE_PLAYING; break;
+        case ESP_GMF_EVENT_STATE_PAUSED:   state = AUDIO_STATE_PAUSED; break;
+        case ESP_GMF_EVENT_STATE_STOPPED:  state = AUDIO_STATE_STOPPED; break;
+        case ESP_GMF_EVENT_STATE_ERROR:    state = AUDIO_STATE_ERROR; break;
+        case ESP_GMF_EVENT_STATE_FINISHED: 
+            if (s_player.is_gapless && s_player.current_uri && strncmp(s_player.current_uri, "http", 4) != 0) {
+                xTaskCreate(gapless_restart_task, "gapless_res", 3072, NULL, 5, NULL);
+                return ESP_GMF_ERR_OK; 
+            } else {
+                state = AUDIO_STATE_FINISHED; 
+            }
+            break;
         default: break;
-        }
-        if (state != AUDIO_STATE_NONE) {
-            s_player.state_cb(state);
-        }
+    }
+
+    if (state != AUDIO_STATE_NONE) {
+        s_player.state_cb(state);
     }
     return ESP_GMF_ERR_OK;
 }
 
-static esp_gmf_err_t _pipeline_strategy_cb(esp_gmf_task_handle_t handle, uint8_t strategy_type, void *ctx, uint8_t *out_action) {
-    if (strategy_type == GMF_TASK_STRATEGY_TYPE_FINISH) {
-        if (s_player.is_gapless && s_player.current_uri && strncmp(s_player.current_uri, "http", 4) != 0) {
-            // 1. 保持重置动作
-            *out_action = GMF_TASK_STRATEGY_ACTION_RESET;
-            
-            // 2. 复位文件 IO 指针
-            esp_gmf_io_handle_t io = s_player.pipe->in;
-            esp_gmf_io_close(io);
-            esp_gmf_io_reset(io);
-            esp_gmf_io_set_uri(io, s_player.current_uri);
-            esp_gmf_io_open(io);
-            
-            // 3. 【核心修复】：将丢失的音频处理节点重新装载进任务队列
-            esp_gmf_pipeline_loading_jobs(s_player.pipe);
-            
-            // 4. 【核心修复】：重新唤醒流水线投入运行
-            esp_gmf_pipeline_run(s_player.pipe);
-            
-            ESP_LOGI(TAG, "Gapless Loop triggered! Pipeline jobs reloaded and running.");
-        } else {
-            *out_action = GMF_TASK_STRATEGY_ACTION_DEFAULT;
-        }
-    } else {
-        *out_action = GMF_TASK_STRATEGY_ACTION_DEFAULT;
-    }
-    return ESP_GMF_ERR_OK;
-}
 // ==========================================
-// 播放器控制接口
+// 4. 播放器控制公开接口
 // ==========================================
 esp_err_t audio_gmf_system_init(void) {
     esp_err_t ret = audio_hardware_init();
     if (ret != ESP_OK) return ret;
 
-    // 只初始化组件池，不在这里创建 Pipeline
     esp_gmf_pool_init(&s_player.pool);
-    gmf_loader_setup_io_default(s_player.pool); // 包含 io_file 和 io_http
+    gmf_loader_setup_io_default(s_player.pool); 
     gmf_loader_setup_audio_codec_default(s_player.pool);
     gmf_loader_setup_audio_effects_default(s_player.pool);
 
@@ -337,7 +1265,6 @@ void audio_player_set_callback(audio_state_cb_t cb) {
 esp_err_t audio_player_play(const char *uri, bool gapless) {
     if (!uri) return ESP_ERR_INVALID_ARG;
 
-    // 1. 如果有正在运行的流水线，先安全销毁
     if (s_player.pipe) {
         esp_gmf_pipeline_stop(s_player.pipe);
         esp_gmf_task_deinit(s_player.work_task);
@@ -345,34 +1272,26 @@ esp_err_t audio_player_play(const char *uri, bool gapless) {
         s_player.pipe = NULL;
     }
 
-    // 2. 更新上下文
     if (s_player.current_uri) free(s_player.current_uri);
     s_player.current_uri = strdup(uri);
     s_player.is_gapless = gapless;
 
-    // 3. 动态判断输入源是 http 还是 file
     const char *in_name = (strncmp(uri, "http", 4) == 0) ? "io_http" : "io_file";
     const char *name[] = {"aud_dec", "aud_ch_cvt", "aud_bit_cvt", "aud_rate_cvt"};
-
-    // 4. 构建新的流水线
+    
     esp_err_t ret = esp_gmf_pool_new_pipeline(s_player.pool, in_name, name, 4, "io_codec_dev", &s_player.pipe);
     if (ret != ESP_OK) return ret;
 
-    // 绑定输出外设和输入 URI
     esp_gmf_element_handle_t out_el = ESP_GMF_PIPELINE_GET_OUT_INSTANCE(s_player.pipe);
     esp_gmf_io_codec_dev_set_dev(out_el, playback_handle);
     esp_gmf_pipeline_set_in_uri(s_player.pipe, uri);
 
-    // 5. 绑定任务与回调
     esp_gmf_task_cfg_t task_cfg = DEFAULT_ESP_GMF_TASK_CONFIG();
-    task_cfg.thread.stack_in_ext = false;
+    task_cfg.thread.stack_in_ext = false; 
     task_cfg.name = "gmf_pipe_task";
     esp_gmf_task_init(&task_cfg, &s_player.work_task);
 
-    // 注册策略 (无缝核心) 与 事件监听
-    esp_gmf_task_set_strategy_func(s_player.work_task, _pipeline_strategy_cb, NULL);
     esp_gmf_pipeline_set_event(s_player.pipe, _pipeline_event_cb, NULL);
-
     esp_gmf_pipeline_bind_task(s_player.pipe, s_player.work_task);
     esp_gmf_pipeline_loading_jobs(s_player.pipe);
 
@@ -459,6 +1378,307 @@ esp_err_t audio_player_stop(void);
 
 
 
+PATH: main/driver_io.c
+// ------------------------------------------
+// 📄 driver_io.c
+// ------------------------------------------
+#include "driver_io.h"
+#include "driver/gpio.h"
+#include "esp_log.h"
+#include "esp_spiffs.h"
+
+static const char *TAG = "driver_io";
+#define SPIFFS_MOUNT_POINT "/spiffs"
+#define SPIFFS_PART_LABEL "storage"
+
+void driver_io_init(void) {
+    // 包含 GPIO 45, 46 (电源) 和 GPIO 21 (音频 PA)
+    uint64_t pin_mask = (1ULL << 45) | (1ULL << 46) | (1ULL << 21);
+
+    gpio_config_t io_conf = {
+        .pin_bit_mask = pin_mask,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+
+    // 拉高外设电源和电池 Boost
+    gpio_set_level(45, 1);
+    gpio_set_level(46, 1);
+    
+    // 拉高音频 PA 使能引脚
+    gpio_set_level(21, 1);
+    
+    ESP_LOGI("driver_io", "IO Init: GPIO 45, 46 and 21 (PA EN) set to HIGH");
+}
+
+void driver_io_mount_spiffs(void) {
+  esp_vfs_spiffs_conf_t spiffs_conf = {
+      .base_path = SPIFFS_MOUNT_POINT,
+      .partition_label = SPIFFS_PART_LABEL,
+      .max_files = 5,
+      .format_if_mount_failed = true,
+  };
+
+  esp_err_t ret = esp_vfs_spiffs_register(&spiffs_conf);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "SPIFFS mount failed: %s", esp_err_to_name(ret));
+    return;
+  }
+
+  size_t total = 0, used = 0;
+  esp_spiffs_info(SPIFFS_PART_LABEL, &total, &used);
+  ESP_LOGI(TAG, "SPIFFS mounted: total=%u, used=%u", total, used);
+}
+
+
+
+PATH: main/driver_io.h
+// ------------------------------------------
+// 📄 driver_io.h
+// ------------------------------------------
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void driver_io_init(void);
+void driver_io_mount_spiffs(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
+PATH: main/driver_lcd_touch.c
+// ------------------------------------------
+// 📄 driver_lcd_touch.c
+// ------------------------------------------
+#include "driver_lcd_touch.h"
+#include "CST816D.h"
+#include "driver/gpio.h"
+#include "driver/i2c_master.h"
+#include "driver/spi_master.h"
+#include "esp_lcd_panel_io.h"
+#include "esp_lcd_panel_ops.h"
+#include "esp_lcd_panel_vendor.h"
+#include "esp_lcd_spd2010.h"
+#include "esp_log.h"
+#include "esp_lv_decoder.h" // 新增：图片解码库
+#include "esp_lvgl_port.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "lvgl.h"
+
+#define TAG "LCD_TOUCH"
+
+// --- 更新后的屏幕引脚定义 ---
+#define LCD_HOST     (SPI2_HOST)
+#define LCD_CS 5
+#define LCD_SCLK 6
+#define LCD_D0 7
+#define LCD_D1 8
+#define LCD_D2 11
+#define LCD_D3 12
+#define LCD_BK 1
+#define LCD_RST 48
+
+// --- 更新后的触摸引脚定义 ---
+#define TP_I2C_PORT I2C_NUM_0
+#define TP_SCL 3
+#define TP_SDA 4
+#define TP_RST -1 // 如果硬件上触摸复位没接，设为 -1
+#define TP_INT 2  // 触摸中断引脚
+
+// ----------------------- 屏幕参数 -----------------------
+#define LCD_H_RES 412
+#define LCD_V_RES 412
+#define LCD_BIT_PER_PIXEL 16
+
+#define MAX_TRANSFER_SZ (LCD_H_RES * 80 * sizeof(uint16_t))
+#define LVGL_BUF_LINES 64
+#define LVGL_BUF_SIZE ((LCD_H_RES * LVGL_BUF_LINES + 31) & ~31)
+
+// ----------------------- 全局句柄 -----------------------
+static esp_lcd_panel_handle_t panel_handle = NULL;
+static esp_lcd_panel_io_handle_t io_handle = NULL;
+static i2c_master_bus_handle_t i2c_bus = NULL;
+static esp_lv_decoder_handle_t decoder_handle = NULL; // 新增：解码器句柄
+
+// ----------------------- 触摸读回调（LVGL 9.x 接口） -----------------------
+static void lvgl_touch_read(lv_indev_t *indev, lv_indev_data_t *data) {
+    uint16_t x, y;
+    uint8_t gesture;
+    uint8_t num = CST816D_getTouch(&x, &y, &gesture);
+    if (num > 0) {
+        data->point.x = x;
+        data->point.y = y;
+        data->state = LV_INDEV_STATE_PR;
+    } else {
+        data->state = LV_INDEV_STATE_REL;
+    }
+}
+
+// ----------------------- 初始化入口 -----------------------
+void driver_lcd_touch_init(void) {
+    // 1. 背光使能
+    gpio_config_t bk_conf = {
+        .pin_bit_mask = (1ULL << LCD_BK),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&bk_conf);
+    gpio_set_level(LCD_BK, 1);
+
+    // 2. 初始化 SPI 总线（QSPI）
+    spi_bus_config_t buscfg = {
+        .data0_io_num = LCD_D0,
+        .data1_io_num = LCD_D1,
+        .data2_io_num = LCD_D2,
+        .data3_io_num = LCD_D3,
+        .sclk_io_num = LCD_SCLK,
+        .max_transfer_sz = MAX_TRANSFER_SZ,
+        .flags = SPICOMMON_BUSFLAG_MASTER,
+        .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,
+    };
+    ESP_ERROR_CHECK(spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO));
+
+    // 3. 创建面板 IO（QSPI）
+    esp_lcd_panel_io_spi_config_t io_config = {
+        .cs_gpio_num = LCD_CS,
+        .dc_gpio_num = -1,
+        .spi_mode = 3,
+        .pclk_hz = 40 * 1000 * 1000,
+        .trans_queue_depth = 10,
+        .user_ctx = NULL,
+        .lcd_cmd_bits = 32,
+        .lcd_param_bits = 8,
+        .flags =
+            {
+                .quad_mode = true,
+            },
+    };
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST,
+                                             &io_config, &io_handle));
+
+    // 4. 创建 SPD2010 面板
+    const spd2010_vendor_config_t vendor_config = {
+        .flags = {.use_qspi_interface = 1},
+    };
+    const esp_lcd_panel_dev_config_t panel_config = {
+        .reset_gpio_num = LCD_RST,
+        .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
+        .bits_per_pixel = LCD_BIT_PER_PIXEL,
+        .vendor_config = (void *)&vendor_config,
+    };
+    ESP_ERROR_CHECK(
+        esp_lcd_new_panel_spd2010(io_handle, &panel_config, &panel_handle));
+
+    // 5. 复位 & 初始化面板
+    ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
+    ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
+    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
+
+    // 6. 初始化 I2C 主总线（触摸）
+    i2c_master_bus_config_t i2c_mst_cfg = {
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .i2c_port = TP_I2C_PORT,
+        .scl_io_num = TP_SCL,
+        .sda_io_num = TP_SDA,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_cfg, &i2c_bus));
+
+    if (TP_RST >= 0) {
+        // 7. 触摸芯片硬件复位
+        gpio_config_t tp_rst_conf = {
+            .pin_bit_mask = (1ULL << TP_RST),
+            .mode = GPIO_MODE_OUTPUT,
+            .pull_up_en = GPIO_PULLUP_ENABLE,
+            .pull_down_en = GPIO_PULLDOWN_DISABLE,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
+        gpio_config(&tp_rst_conf);
+        gpio_set_level(TP_RST, 0);
+        vTaskDelay(pdMS_TO_TICKS(10));
+        gpio_set_level(TP_RST, 1);
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+
+    // 8. 初始化触摸芯片
+    ESP_ERROR_CHECK(CST816D_init(i2c_bus));
+
+    // 9. 初始化 LVGL 端口
+    const lvgl_port_cfg_t lvgl_cfg = ESP_LVGL_PORT_INIT_CONFIG();
+    ESP_ERROR_CHECK(lvgl_port_init(&lvgl_cfg));
+
+    // 10. 注册显示器
+    const lvgl_port_display_cfg_t disp_cfg = {
+        .io_handle = io_handle,
+        .panel_handle = panel_handle,
+        .buffer_size = LVGL_BUF_SIZE,
+        .double_buffer = true,
+        .hres = LCD_H_RES,
+        .vres = LCD_V_RES,
+        .monochrome = false,
+        .rotation =
+            {
+                .swap_xy = false,
+                .mirror_x = false,
+                .mirror_y = false,
+            },
+        .flags =
+            {
+                .buff_dma = true,
+                .swap_bytes = true,
+            },
+    };
+    lv_display_t *disp = lvgl_port_add_disp(&disp_cfg);
+    ESP_LOGI(TAG, "Display registered: %dx%d", LCD_H_RES, LCD_V_RES);
+
+    // 11. 注册触摸输入设备
+    lv_indev_t *indev = lv_indev_create();
+    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(indev, lvgl_touch_read);
+    lv_indev_set_disp(indev, disp);
+    ESP_LOGI(TAG, "Touch input registered (LVGL 9.x)");
+
+    // 12. 初始化硬件图片解码器（esp_lv_decoder）
+    esp_err_t err = esp_lv_decoder_init(&decoder_handle);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "esp_lv_decoder registered (HW accelerated)");
+    } else {
+        ESP_LOGE(TAG, "Failed to init esp_lv_decoder: %d", err);
+    }
+}
+
+
+
+PATH: main/driver_lcd_touch.h
+// ------------------------------------------
+// 📄 driver_lcd_touch.h
+// ------------------------------------------
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void driver_lcd_touch_init(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
 PATH: main/idf_component.yml
 // ------------------------------------------
 // 📄 idf_component.yml
@@ -531,9 +1751,10 @@ void my_audio_state_callback(audio_play_state_t state) {
 }
 
 void app_main(void) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-
+    vTaskDelay(pdMS_TO_TICKS(500));
     // 1. 基础系统与外设初始化
+    driver_io_init();
+    vTaskDelay(pdMS_TO_TICKS(500));
     driver_io_mount_spiffs();
     driver_lcd_touch_init();
 
