@@ -38,14 +38,18 @@ CUSTOM_BLOCK_LIST = [
     'image.png',
     'image2.png',
     'image3.png',
-    'lvgl_img_jpeg_png_test.',
+    'lvgl_img_jpeg_png_test.c',
     'lvgl_img_jpeg_png_test.h',
     'lvgl_img_rotate_test.c',
     'lvgl_img_rotate_test.h',
     'lvgl_img_random_move_test.c',
     'lvgl_img_random_move_test.h',
-    # 'lvgl_font_size_test.c',
-    # 'lvgl_font_size_test.h',
+    'lvgl_font_size_test.c',
+    'lvgl_font_size_test.h',
+    'lvgl_ahv_test.h',
+    'lvgl_ahv_test.c',
+    'lvgl_arc_list_test.h',
+    'lvgl_arc_list_test.c',
 
 ]
 
@@ -237,3 +241,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

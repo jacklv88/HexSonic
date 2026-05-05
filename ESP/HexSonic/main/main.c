@@ -21,7 +21,6 @@ void app_main(void) {
   driver_io_mount_spiffs();
   driver_lcd_touch_init();
   lvgl_port_lock(0);
-
   // 注释掉之前的测试，运行新的圆弧列表
   // lvgl_img_jpeg_png_test_init();
   // lvgl_img_rotate_test_init();
@@ -29,7 +28,6 @@ void app_main(void) {
   // lvgl_font_size_test_init(); 
   // lvgl_arc_list_test_init();        
   lvgl_ahv_test_init();
-
   lvgl_port_unlock();
   while (1) {
     vTaskDelay(pdMS_TO_TICKS(1000));

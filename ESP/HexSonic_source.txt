@@ -1,7 +1,7 @@
 ESP-IDF / C++ 代码导出
 ==================================================
-时间: 2026-05-05 12:11:37
-屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'image3.png', 'lvgl_img_jpeg_png_test.', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h']
+时间: 2026-05-05 15:12:59
+屏蔽规则: ['build', 'managed_components', '.git', '.vscode', '.idea', 'dist', 'sdkconfig', 'driver_lcd_touch.c', 'driver_lcd_touch.h', 'driver_io.h', 'driver_io.c', 'CST816D.c', 'CST816D.h', 'esp_lcd_spd2010.c', 'esp_lcd_spd2010.h', 'image.jpg', 'image.png', 'image2.png', 'image3.png', 'lvgl_img_jpeg_png_test.c', 'lvgl_img_jpeg_png_test.h', 'lvgl_img_rotate_test.c', 'lvgl_img_rotate_test.h', 'lvgl_img_random_move_test.c', 'lvgl_img_random_move_test.h', 'lvgl_font_size_test.c', 'lvgl_font_size_test.h', 'lvgl_ahv_test.h', 'lvgl_ahv_test.c', 'lvgl_arc_list_test.h', 'lvgl_arc_list_test.c']
 说明: 仅导出 .c, .h, .cpp, CMakeLists.txt 等源码文件。
 
 
@@ -35,20 +35,22 @@ LVGL 的版本是 9.5.0  esp_lvgl_port 的版本是 2.7.2
 │   │   📄 driver_io.h [🚫 已过滤]
 │   │   📄 driver_lcd_touch.c [🚫 已过滤]
 │   │   📄 driver_lcd_touch.h [🚫 已过滤]
-│   │   📄 lvgl_arc_list_test.c
-│   │   📄 lvgl_arc_list_test.h
-│   │   📄 lvgl_font_size_test.c
-│   │   📄 lvgl_font_size_test.h
-│   │   📄 lvgl_img_jpeg_png_test.c
-│   │   📄 lvgl_img_jpeg_png_test.h [🚫 已过滤]
-│   │   📄 lvgl_img_random_move_test.c [🚫 已过滤]
-│   │   📄 lvgl_img_random_move_test.h [🚫 已过滤]
-│   │   📄 lvgl_img_rotate_test.c [🚫 已过滤]
-│   │   📄 lvgl_img_rotate_test.h [🚫 已过滤]
 │   │   📄 main.c
+│   ├── 📁 lvgl_test/
+│   │   │   📄 lvgl_ahv_test.c [🚫 已过滤]
+│   │   │   📄 lvgl_ahv_test.h [🚫 已过滤]
+│   │   │   📄 lvgl_arc_list_test.c [🚫 已过滤]
+│   │   │   📄 lvgl_arc_list_test.h [🚫 已过滤]
+│   │   │   📄 lvgl_font_size_test.c [🚫 已过滤]
+│   │   │   📄 lvgl_font_size_test.h [🚫 已过滤]
+│   │   │   📄 lvgl_img_jpeg_png_test.c [🚫 已过滤]
+│   │   │   📄 lvgl_img_jpeg_png_test.h [🚫 已过滤]
+│   │   │   📄 lvgl_img_random_move_test.c [🚫 已过滤]
+│   │   │   📄 lvgl_img_random_move_test.h [🚫 已过滤]
+│   │   │   📄 lvgl_img_rotate_test.c [🚫 已过滤]
+│   │   │   📄 lvgl_img_rotate_test.h [🚫 已过滤]
 ├── 📁 spiffs/
 │   │   📄 image.jpg [🚫 已过滤]
-│   │   📄 image.png [🚫 已过滤]
 │   │   📄 image2.png [🚫 已过滤]
 │   │   📄 image3.png [🚫 已过滤]
 
@@ -86,305 +88,38 @@ PATH: main/CMakeLists.txt
 // ------------------------------------------
 // 📄 CMakeLists.txt
 // ------------------------------------------
-idf_component_register(
-    SRCS "main.c" "driver_io.c" "driver_lcd_touch.c"
-         "lvgl_img_jpeg_png_test.c" "lvgl_img_rotate_test.c"
-         "lvgl_img_random_move_test.c"
-         "lvgl_font_size_test.c" 
-         "lvgl_arc_list_test.c"            # <--- 新增圆弧列表测试文件
-    PRIV_REQUIRES spi_flash lcd_pro esp_lvgl_port spiffs esp_lv_decoder
-    INCLUDE_DIRS "."
+# 📄 main/CMakeLists.txt
+
+# 定义 lvgl_test 目录下的源文件
+set(lvgl_test_srcs
+    "lvgl_test/lvgl_ahv_test.c"
+    "lvgl_test/lvgl_arc_list_test.c"
+    "lvgl_test/lvgl_font_size_test.c"
+    "lvgl_test/lvgl_img_jpeg_png_test.c"
+    "lvgl_test/lvgl_img_random_move_test.c"
+    "lvgl_test/lvgl_img_rotate_test.c"
 )
 
+idf_component_register(
+    SRCS "main.c" 
+         "driver_io.c" 
+         "driver_lcd_touch.c"
+         ${lvgl_test_srcs}  # 引入测试界面源码
+    
+    PRIV_REQUIRES 
+        spi_flash 
+        lcd_pro 
+        esp_lvgl_port 
+        spiffs 
+        esp_lv_decoder
+        
+    INCLUDE_DIRS 
+        "." 
+        "lvgl_test"  # 必须添加此项，否则 main.c 找不到测试界面的头文件
+)
+
+# 创建 SPIFFS 分区镜像
 spiffs_create_partition_image(storage ../spiffs FLASH_IN_PROJECT)
-
-
-
-PATH: main/lvgl_arc_list_test.c
-// ------------------------------------------
-// 📄 lvgl_arc_list_test.c
-// ------------------------------------------
-#include "lvgl_arc_list_test.h"
-#include "esp_log.h"
-#include "lvgl.h"
-#include <math.h>
-
-static const char *TAG = "arc_list_round";
-
-static void scroll_event_cb(lv_event_t * e)
-{
-    lv_obj_t * cont = lv_event_get_target(e);
-    const int32_t screen_center_y = 206; 
-    const int32_t visible_threshold = 280; 
-
-    uint32_t child_cnt = lv_obj_get_child_cnt(cont);
-    for(uint32_t i = 0; i < child_cnt; i++) {
-        lv_obj_t * child = lv_obj_get_child(cont, i);
-        
-        if(!lv_obj_has_flag(child, LV_OBJ_FLAG_SNAPPABLE)) continue; 
-
-        lv_area_t child_a;
-        lv_obj_get_coords(child, &child_a);
-        int32_t child_y_center = child_a.y1 + lv_area_get_height(&child_a) / 2;
-        int32_t diff_y = child_y_center - screen_center_y;
-        
-        /* 视口剔除：屏幕外的直接不管 */
-        if (abs(diff_y) > visible_threshold) {
-            continue; 
-        }
-
-        /* 核心视觉保留：X轴的圆弧偏移 (这个运算非常快) */
-        int32_t x_ofs = (diff_y * diff_y) / 400; // 稍微改小一点除数，让弧度更明显
-        lv_obj_set_style_translate_x(child, x_ofs, 0);
-
-    }
-}
-
-void lvgl_arc_list_test_init(void)
-{
-    lv_obj_t * scr = lv_scr_act();
-    lv_obj_clean(scr);
-    lv_obj_set_style_bg_color(scr, lv_color_hex(0x000000), 0); // 纯黑底适合圆形屏
-
-    /* 1. 创建全屏容器 */
-    lv_obj_t * list = lv_obj_create(scr);
-    lv_obj_set_size(list, 412, 412);
-    lv_obj_center(list);
-    
-    /* 关键设置：切圆并隐藏超出部分 */
-    lv_obj_set_style_radius(list, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_clip_corner(list, true, 0);
-    lv_obj_set_style_bg_opa(list, 0, 0);
-    lv_obj_set_style_border_width(list, 0, 0);
-    
-    /* 布局设置 */
-    lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_ver(list, 150, 0); // 上下留白，确保第一个/最后一个元素能滑到中心
-    lv_obj_set_style_pad_row(list, 20, 0);
-    lv_obj_set_scrollbar_mode(list, LV_SCROLLBAR_MODE_OFF);
-
-    /* 滑动吸附：让 Cell 停在屏幕正中央 */
-    lv_obj_set_scroll_snap_y(list, LV_SCROLL_SNAP_CENTER);
-
-    /* 2. 创建 30 个 Cell */
-    for(int i = 0; i < 30; i++) {
-        lv_obj_t * cell = lv_obj_create(list);
-        lv_obj_set_size(cell, 280, 80); // 宽度不宜占满 412，留出圆弧移动空间
-        lv_obj_set_style_bg_color(cell, lv_color_hex(0x1E1E1E), 0);
-        lv_obj_set_style_radius(cell, 20, 0);
-        lv_obj_set_style_border_width(cell, 0, 0);
-        lv_obj_add_flag(cell, LV_OBJ_FLAG_SNAPPABLE);
-
-        lv_obj_set_flex_flow(cell, LV_FLEX_FLOW_ROW);
-        lv_obj_set_flex_align(cell, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-        lv_obj_set_style_pad_all(cell, 10, 0);
-
-        /* 图片 60px */
-        lv_obj_t * img = lv_image_create(cell);
-        lv_image_set_src(img, "S:image3.png");
-        lv_obj_set_size(img, 60, 60);
-
-        /* 文字 */
-        lv_obj_t * label = lv_label_create(cell);
-        lv_label_set_text_fmt(label, "Item %02d", i + 1);
-        lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
-        lv_obj_set_style_text_font(label, &lv_font_montserrat_14, 0);
-    }
-
-    lv_obj_add_event_cb(list, scroll_event_cb, LV_EVENT_SCROLL, NULL);
-    lv_obj_send_event(list, LV_EVENT_SCROLL, NULL); // 初始排列
-}
-
-
-
-PATH: main/lvgl_arc_list_test.h
-// ------------------------------------------
-// 📄 lvgl_arc_list_test.h
-// ------------------------------------------
-// ------------------------------------------
-// 📄 main/lvgl_arc_list_test.h
-// ------------------------------------------
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief 初始化圆弧形滑动列表测试界面
- * 展示 30 个带有 image2.png 的动态排布列表单元
- */
-void lvgl_arc_list_test_init(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-PATH: main/lvgl_font_size_test.c
-// ------------------------------------------
-// 📄 lvgl_font_size_test.c
-// ------------------------------------------
-#include "lvgl_font_size_test.h"
-#include "esp_log.h"
-#include "lvgl.h"
-
-
-static const char *TAG = "font_test";
-static lv_obj_t *label;
-static lv_obj_t *info_label;
-
-static int font_size = 24;       // 初始大小
-static lv_font_t *ttf_font = NULL;
-
-static void update_font(void)
-{
-    if (ttf_font) {
-        lv_tiny_ttf_destroy(ttf_font);
-    }
-
-    // 替换为你的 ttf 文件路径或数组
-    ttf_font = lv_tiny_ttf_create_file("S:yefont.ttf", font_size);
-    if (!ttf_font) {
-        ESP_LOGE(TAG, "Failed to create TTF font");
-        return;
-    }
-
-    lv_obj_set_style_text_font(label, ttf_font, 0);
-    lv_obj_center(label);
-
-    lv_label_set_text_fmt(info_label, "Size: %d px", font_size);
-}
-
-static void btn_plus_cb(lv_event_t *e)
-{
-    if (font_size < 60) {
-        font_size += 4;
-        update_font();
-    }
-}
-
-static void btn_minus_cb(lv_event_t *e)
-{
-    if (font_size > 8) {
-        font_size -= 4;
-        update_font();
-    }
-}
-
-void lvgl_font_size_test_init(void){
-
-    lv_obj_t *scr = lv_scr_act();
-    lv_obj_clean(scr);
-
-    label = lv_label_create(scr);
-    lv_label_set_text(label, "Hello LVGL!");
-    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
-
-    info_label = lv_label_create(scr);
-    lv_obj_align(info_label, LV_ALIGN_TOP_MID, 0, 20);
-
-    lv_obj_t *btn_minus = lv_btn_create(scr);
-    lv_obj_set_size(btn_minus, 60, 40);
-    lv_obj_align(btn_minus, LV_ALIGN_BOTTOM_MID, -60, -30);
-    lv_obj_t *lab_minus = lv_label_create(btn_minus);
-    lv_label_set_text(lab_minus, "-");
-    lv_obj_center(lab_minus);
-    lv_obj_add_event_cb(btn_minus, btn_minus_cb, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t *btn_plus = lv_btn_create(scr);
-    lv_obj_set_size(btn_plus, 60, 40);
-    lv_obj_align(btn_plus, LV_ALIGN_BOTTOM_MID, 60, -30);
-    lv_obj_t *lab_plus = lv_label_create(btn_plus);
-    lv_label_set_text(lab_plus, "+");
-    lv_obj_center(lab_plus);
-    lv_obj_add_event_cb(btn_plus, btn_plus_cb, LV_EVENT_CLICKED, NULL);
-
-    update_font();   // 初次渲染
-}
-
-
-
-PATH: main/lvgl_font_size_test.h
-// ------------------------------------------
-// 📄 lvgl_font_size_test.h
-// ------------------------------------------
-// lvgl_font_size_test.h
-#pragma once
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief 初始化字体缩放测试界面
- *        使用两个按钮（+/-）连续放大/缩小屏幕中央的文字
- */
-void lvgl_font_size_test_init(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
-PATH: main/lvgl_img_jpeg_png_test.c
-// ------------------------------------------
-// 📄 lvgl_img_jpeg_png_test.c
-// ------------------------------------------
-#include "lvgl_img_jpeg_png_test.h"
-#include "esp_log.h"
-#include "esp_lv_decoder.h"
-#include "esp_spiffs.h"
-#include "lvgl.h"
-#include <stdio.h>
-
-static const char *TAG = "lvgl_img_test";
-
-
-static lv_obj_t *img_obj = NULL;
-static bool showing_png = true;
-
-/* -------------------------- 按钮切换回调 -------------------------- */
-static void toggle_img(lv_event_t *e) {
-  if (showing_png) {
-    ESP_LOGI(TAG, "切换到 JPG");
-    lv_image_set_src(img_obj, "S:image.jpg");
-    showing_png = false;
-
-  } else {
-    ESP_LOGI(TAG, "切换到 PNG");
-    lv_image_set_src(img_obj, "S:image.png");
-    showing_png = true;
-  }
-}
-
-/* -------------------------- 初始化函数 -------------------------- */
-void lvgl_img_jpeg_png_test_init(void) {
-  ESP_LOGI(TAG, "===== 开始初始化 =====");
-
-
-  // 4. 创建 UI
-  img_obj = lv_image_create(lv_scr_act());
-  lv_image_set_src(img_obj, "S:image.png");
-  lv_obj_center(img_obj);
-
-  lv_obj_t *btn = lv_btn_create(lv_scr_act());
-  lv_obj_set_size(btn, 120, 50);
-  lv_obj_align(btn, LV_ALIGN_BOTTOM_MID, 0, -20);
-  lv_obj_t *lab = lv_label_create(btn);
-  lv_label_set_text(lab, "Switch");
-  lv_obj_center(lab);
-  lv_obj_add_event_cb(btn, toggle_img, LV_EVENT_CLICKED, NULL);
-
-  lv_obj_t *hint = lv_label_create(lv_scr_act());
-  lv_label_set_text(hint, "Touch to switch PNG/JPG");
-  lv_obj_align(hint, LV_ALIGN_BOTTOM_MID, 0, -80);
-
-  ESP_LOGI(TAG, "===== 初始化完成 =====");
-}
 
 
 
@@ -406,6 +141,7 @@ PATH: main/main.c
 #include "lvgl_img_rotate_test.h"
 #include "lvgl_font_size_test.h"
 #include "lvgl_arc_list_test.h"        // <--- 引入圆弧列表头文件
+#include "lvgl_ahv_test.h"
 
 #define TAG "main"
 
@@ -414,15 +150,13 @@ void app_main(void) {
   driver_io_mount_spiffs();
   driver_lcd_touch_init();
   lvgl_port_lock(0);
-
   // 注释掉之前的测试，运行新的圆弧列表
   // lvgl_img_jpeg_png_test_init();
   // lvgl_img_rotate_test_init();
   // lvgl_img_random_move_test_init(); 
   // lvgl_font_size_test_init(); 
-  
-  lvgl_arc_list_test_init();           // <--- 调用圆弧列表初始化
-
+  // lvgl_arc_list_test_init();        
+  lvgl_ahv_test_init();
   lvgl_port_unlock();
   while (1) {
     vTaskDelay(pdMS_TO_TICKS(1000));
